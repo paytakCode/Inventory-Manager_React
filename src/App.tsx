@@ -6,6 +6,7 @@ import Intro from "./pages/IntroPage";
 import Main from './pages/MainPage';
 
 function App() {
+
     return (
         <Router>
             <Routes>

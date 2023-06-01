@@ -1,18 +1,57 @@
+import styles from 'pages/Layout/Header.module.scss'
+import {UserInfo} from "components/userInfo";
 import React from "react";
-import {UserInfo} from "../../components/userInfo";
-import Cookies from "js-cookie";
-import LoadMenuByRole from "../../components/Menu/LoadMenuByRole";
 
+const Header = (props: { userInfo: UserInfo, onMenuSelect: (menu: string) => void }) => {
+    const handleMenuClick = (menu: string) => {
+        props.onMenuSelect(menu); // 선택된 메뉴를 상위 컴포넌트로 전달
+    };
 
-const Header: React.FC = () => {
-    const userInfo: UserInfo = JSON.parse(Cookies.get("userInfo") as string);
+    const loadMenuByRole = (role: string) => {
+        if (role === "관리자") {
+            return <ul>
+                <li onClick={() => handleMenuClick("AccountManagement")}>계정관리</li>
+                <li onClick={() => handleMenuClick("Material")}>자재</li>
+                <li onClick={() => handleMenuClick("Product")}>제품</li>
+                <li onClick={() => handleMenuClick("Production")}>생산</li>
+                <li onClick={() => handleMenuClick("Sales")}>영업</li>
+            </ul>
+        } else if (role === "자재부"
+            || role === "생산부"
+            || role === "영업부") {
+            return <ul>
+                <li onClick={() => handleMenuClick("Material")}>자재</li>
+                <li onClick={() => handleMenuClick("Product")}>제품</li>
+                <li onClick={() => handleMenuClick("Production")}>생산</li>
+                <li onClick={() => handleMenuClick("Sales")}>영업</li>
+            </ul>
+        } else if (role === "대기") {
+            return <ul>
+                <li>부서가 배정되지 않았습니다. 관리자에게 문의하세요.</li>
+            </ul>
+        } else {
+            return <ul>
+                <li>부적절한 접근입니다.</li>
+            </ul>
+        }
+    };
 
     return (
-        <div>
-            <LoadMenuByRole role={userInfo.role}/>
-            <h2>Header</h2>
-        </div>
-    );
-};
+        <header className={styles.header}>
+            <div className={styles.contents}>
+                <div>
+                    로고 자리
+                </div>
 
-export default Header;
+                <nav className={styles.navigation}>
+                    {loadMenuByRole(props.userInfo.role)}
+                </nav>
+                <div>
+
+                </div>
+            </div>
+        </header>
+    )
+}
+
+export default Header

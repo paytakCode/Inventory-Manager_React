@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import Footer from "./Layout/Footer";
-import Header from "./Layout/Header";
-import {login} from "../services/authService";
+import Footer from "pages/Layout/Footer";
+import {login} from "services/authService";
+import Cookies from "js-cookie";
 
 interface LoginProps {
     email: string;
@@ -10,12 +10,21 @@ interface LoginProps {
 }
 
 const Login: React.FC = () => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const isLoggedIn = Cookies.get('jwt') !== undefined;
+        if (isLoggedIn) {
+            navigate('/main');
+        }
+    });
+
+
     const [loginData, setLoginData] = useState<LoginProps>({
         email: '',
         password: '',
     });
 
-    const navigate = useNavigate();
     const navigateToIntro = () => {
         navigate("/");
     }
@@ -31,7 +40,6 @@ const Login: React.FC = () => {
 
     return (
         <>
-            <Header/>
             <div>
                 <button onClick={navigateToIntro}>인트로 페이지</button>
                 <h2>로그인</h2>
