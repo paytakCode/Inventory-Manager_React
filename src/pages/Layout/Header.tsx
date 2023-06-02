@@ -4,7 +4,7 @@ import React from "react";
 
 const Header = (props: { userInfo: UserInfo, onMenuSelect: (menu: string) => void }) => {
     const handleMenuClick = (menu: string) => {
-        props.onMenuSelect(menu); // 선택된 메뉴를 상위 컴포넌트로 전달
+        props.onMenuSelect(menu);
     };
 
     const loadMenuByRole = (role: string) => {
@@ -36,6 +36,13 @@ const Header = (props: { userInfo: UserInfo, onMenuSelect: (menu: string) => voi
         }
     };
 
+    const userIcon = (userInfo:UserInfo) => {
+      return <ul>
+        <li>{userInfo.name}</li>
+        <li>{userInfo.role}</li>
+      </ul>
+    };
+
     return (
         <header className={styles.header}>
             <div className={styles.contents}>
@@ -47,7 +54,7 @@ const Header = (props: { userInfo: UserInfo, onMenuSelect: (menu: string) => voi
                     {loadMenuByRole(props.userInfo.role)}
                 </nav>
                 <div>
-
+                    {userIcon(props.userInfo)}
                 </div>
             </div>
         </header>
