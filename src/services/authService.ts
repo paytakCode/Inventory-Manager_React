@@ -3,6 +3,8 @@ import Cookies from 'js-cookie';
 import jwt_decode from 'jwt-decode';
 import {UserInfo} from "../components/userInfo";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 interface LoginData {
     email: string;
     password: string;
@@ -19,7 +21,7 @@ const setUserInfoToCookie = (authorization: string) => {
 const login = async (loginData: LoginData, navigate: any) => {
 
     try {
-        const response = await axios.post('http://localhost:9999/api/v1/login', loginData);
+        const response = await axios.post(API_BASE_URL + '/login', loginData);
         if (response.status === 200) {
             console.log(response.headers['authorization']);
             const authorization = response.headers['authorization'];
@@ -35,7 +37,7 @@ const login = async (loginData: LoginData, navigate: any) => {
 const logout = async (navigate: any) => {
 
     try {
-        const response = await axios.post('http://localhost:9999/api/v1/logout', {}, {
+        const response = await axios.post(API_BASE_URL + '/logout', {}, {
             headers: {
                 Authorization: Cookies.get("jwt") as string
             }

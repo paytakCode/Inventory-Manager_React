@@ -2,9 +2,11 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import Role from "components/Role";
 
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const getUserList = async () => {
     try {
-        const response = await axios.get('http://localhost:9999/api/v1/users', {
+        const response = await axios.get(API_BASE_URL + '/users', {
             headers: {
                 Authorization: Cookies.get("jwt") as string
             }
@@ -20,7 +22,7 @@ const getUserList = async () => {
 
 const updateUserRole = async(userId: number, role:Role) => {
     try {
-        const response = await axios.put('http://localhost:9999/api/v1/admin/users/' + userId + "/role", {
+        const response = await axios.put(API_BASE_URL + '/admin/users/' + userId + "/role", {
             role : role
         }, {
             headers: {

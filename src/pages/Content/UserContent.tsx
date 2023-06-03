@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getUserList, updateUserRole } from "services/accountManagementService";
+import { getUserList, updateUserRole } from "services/userService";
 import type { UserInfo } from "components/userInfo";
 import Role from "components/Role";
 
-const AccountManagementContent = () => {
+const UserContent = () => {
     const [userList, setUserList] = useState<UserInfo[]>([]);
 
     useEffect(() => {
@@ -23,9 +23,7 @@ const AccountManagementContent = () => {
         try {
             await updateUserRole(userId, newRole);
             setUserList((prevUserList) =>
-                prevUserList.map((user) =>
-                    user.id === userId ? { ...user, role: newRole } : user
-                )
+                prevUserList.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
             );
         } catch (error) {
             console.error("Failed to update user role:", error);
@@ -49,24 +47,11 @@ const AccountManagementContent = () => {
                     </thead>
                     <tbody>
                     {filteredUserList.map((user) => (
-                        <tr key={user.id}>
-                            <td>{user.name}</td>
-                            <td>{user.email}</td>
-                            <td>
-                                <select
-                                    value={user.role}
-                                    onChange={(e) =>
-                                        handleRoleChange(user.id, e.target.value as Role)
-                                    }
-                                >
-                                    {Object.values(Role).map((role) => (
-                                        <option key={role} value={role}>
-                                            {role}
-                                        </option>
-                                    ))}
-                                </select>
-                            </td>
-                        </tr>
+                        <UserRow
+                            key={user.id}
+                            user={user}
+                            handleRoleChange={handleRoleChange}
+                        />
                     ))}
                     </tbody>
                 </table>
@@ -75,4 +60,30 @@ const AccountManagementContent = () => {
     );
 };
 
-export default AccountManagementContent;
+type UserRowProps = {
+    user: UserInfo;
+    handleRoleChange: (userId: number, newRole: Role) => Promise<void>;
+};
+
+const UserRow: React.FC<UserRowProps> = ({ user, handleRoleChange }) => {
+    return (
+        <tr>
+            <td>{user.name}</td>
+            <td>{user.email}</td>
+            <td>
+                <select
+                    value={user.role}
+                    onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
+                >
+                    {Object.values(Role).map((role) => (
+                        <option key={role} value={role}>
+                            {role}
+                        </option>
+                    ))}
+                </select>
+            </td>
+        </tr>
+    );
+};
+
+export default UserContent;

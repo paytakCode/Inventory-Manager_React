@@ -1,11 +1,15 @@
 import React from "react";
-import {useNavigate} from "react-router-dom";
-import {logout} from "../../services/authService";
-import AccountManagement from "pages/Content/AccountManagementContent";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../services/authService";
+import User from "pages/Content/UserContent";
 import Material from "pages/Content/MaterialContent";
 import Product from "pages/Content/ProductContent";
 import Production from "pages/Content/ProductionContent";
-import Sales from "pages/Content/SalesContent";
+import SalesOrder from "pages/Content/SalesOrderContent";
+import MaterialRequest from "pages/Content/MaterialRequestContent";
+import MaterialPurchase from "pages/Content/MaterialPurchaseContent";
+import Supplier from "pages/Content/SupplierContent";
+import Buyer from "pages/Content/BuyerContent";
 
 interface MainContainerProps {
     content: string;
@@ -18,37 +22,31 @@ const MainContainer: React.FC<MainContainerProps> = (props) => {
         logout(navigate);
     };
 
-    let content: React.ReactNode = null;
+    const contentMap: { [key: string]: React.FC } = {
+        default: () => (
+            <>
+                <div>메인 컨테이너</div>
+                <button onClick={handleLogout}>logout</button>
+            </>
+        ),
+        User: User,
+        Material: Material,
+        MaterialRequest: MaterialRequest,
+        MaterialPurchase: MaterialPurchase,
+        Supplier : Supplier,
+        Buyer : Buyer,
+        Product: Product,
+        Production: Production,
+        SalesOrder: SalesOrder
+    };
 
-    switch (props.content) {
-        case "default":
-            content = (
-                <>
-                    <div>메인 컨테이너</div>
-                    <button onClick={handleLogout}>logout</button>
-                </>
-            );
-            break;
-        case "AccountManagement":
-            content = <AccountManagement/>;
-            break;
-        case "Material":
-            content = <Material/>;
-            break;
-        case "Product":
-            content = <Product/>;
-            break;
-        case "Production":
-            content = <Production/>;
-            break;
-        case "Sales":
-            content = <Sales/>;
-            break;
-        default:
-            content = null;
-    }
+    const ContentComponent = contentMap[props.content];
 
-    return <div>{content}</div>;
+    return (
+        <div>
+            {ContentComponent && <ContentComponent />}
+        </div>
+    );
 };
 
 export default MainContainer;
