@@ -1,8 +1,8 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
-import type {UserInfo} from "components/userInfo";
+import type {UserInfoDto} from "components/Base/UserInfoDto";
 
-const LoginUserInfo = (props: { userInfo: UserInfo }) => {
+const LoginUserInfo = (props: { userInfo: UserInfoDto }) => {
     const navigator = useNavigate();
 
     return <>

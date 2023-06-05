@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getBuyerList } from "services/salesService";
-import type {Buyer} from "components/Buyer";
+import type {BuyerDto} from "components/Base/BuyerDto";
 
 const BuyerContent = () => {
-    const [buyerList, setBuyerList] = useState<Buyer[]>([]);
+    const [buyerList, setBuyerList] = useState<BuyerDto[]>([]);
 
     useEffect(() => {
         const fetchBuyerList = async () => {

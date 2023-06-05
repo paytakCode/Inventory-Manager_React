@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getProductionList } from "services/productService";
-import type {Production} from "components/Production";
+import type {ProductionDto} from "components/Base/ProductionDto";
 
 const ProductionContent = () => {
-    const [productionList, setProductionList] = useState<Production[]>([]);
+    const [productionList, setProductionList] = useState<ProductionDto[]>([]);
 
     useEffect(() => {
         const fetchProductionList = async () => {
@@ -38,13 +38,13 @@ const ProductionContent = () => {
                 <tbody>
                 {productionList.map((production) => (
                     <tr key={production.id}>
-                        <td>{production.productId}</td>
-                        <td>{production.managerId}</td>
+                        <td>{production.productDto?.name}</td>
+                        <td>{production.managerDto?.name}</td>
                         <td>{production.lotNo}</td>
                         <td>{production.details}</td>
                         <td>{production.quantity}</td>
-                        <td>{production.targetDate.toString()}</td>
-                        <td>{production.completionDate.toString()}</td>
+                        <td>{production.targetDate?.toString()}</td>
+                        <td>{production.completionDate?.toString()}</td>
                         <td>{production.status}</td>
                     </tr>
                 ))}

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import jwt_decode from 'jwt-decode';
-import {UserInfo} from "../components/userInfo";
+import {UserInfoDto} from "../components/Base/UserInfoDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -13,7 +13,7 @@ interface LoginData {
 const setUserInfoToCookie = (authorization: string) => {
     const expiresHours = 9;
     const expirationDate = new Date(new Date().getTime() + expiresHours * 60 * 60 * 1000);
-    const userInfo: UserInfo = jwt_decode(authorization);
+    const userInfo: UserInfoDto = jwt_decode(authorization);
     Cookies.set("jwt", authorization, {expires: expirationDate});
     Cookies.set("userInfo", JSON.stringify(userInfo), {expires: expirationDate});
 };

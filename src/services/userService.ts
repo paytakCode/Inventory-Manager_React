@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import Role from "components/Role";
+import Role from "components/Base/Role";
+import {UserInfoDto} from "../components/Base/UserInfoDto";
 
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -37,4 +38,14 @@ const updateUserRole = async(userId: number, role:Role) => {
     }
 }
 
-export {getUserList, updateUserRole};
+const getCurrentUserInfo = () => {
+    const storedUserInfo = Cookies.get('userInfo');
+    if (storedUserInfo) {
+        const parsedUserInfo:UserInfoDto = JSON.parse(storedUserInfo);
+        return parsedUserInfo;
+    }
+
+    return {} as UserInfoDto;
+}
+
+export {getUserList, updateUserRole, getCurrentUserInfo};

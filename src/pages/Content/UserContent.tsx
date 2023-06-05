@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getUserList, updateUserRole } from "services/userService";
-import type { UserInfo } from "components/userInfo";
-import Role from "components/Role";
+import type { UserInfoDto } from "components/Base/UserInfoDto";
+import Role from "components/Base/Role";
 
 const UserContent = () => {
-    const [userList, setUserList] = useState<UserInfo[]>([]);
+    const [userList, setUserList] = useState<UserInfoDto[]>([]);
 
     useEffect(() => {
         const fetchUserList = async () => {
@@ -61,7 +61,7 @@ const UserContent = () => {
 };
 
 type UserRowProps = {
-    user: UserInfo;
+    user: UserInfoDto;
     handleRoleChange: (userId: number, newRole: Role) => Promise<void>;
 };
 
@@ -73,7 +73,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, handleRoleChange }) => {
             <td>
                 <select
                     value={user.role}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value as Role)}
+                    onChange={(e) => handleRoleChange(user.id || 0, e.target.value as Role)}
                 >
                     {Object.values(Role).map((role) => (
                         <option key={role} value={role}>

@@ -1,8 +1,14 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import {MaterialDto} from "../components/Base/MaterialDto";
+import {MaterialRequestDto} from "../components/Base/MaterialRequestDto";
+import {MaterialPurchaseDto} from "../components/Base/MaterialPurchaseDto";
+import {SupplierDto} from "../components/Base/SupplierDto";
+import {MaterialContentDto} from "../components/MaterialContentDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-const getMaterialList = async () => {
+export const getMaterialList = async (): Promise<MaterialDto[]>  => {
+    console.log("getMaterialList");
     try {
         const response = await axios.get(API_BASE_URL + '/materials', {
             headers: {
@@ -12,14 +18,17 @@ const getMaterialList = async () => {
         if (response.status === 200) {
             const materialList = response.data;
             return materialList;
+        } else {
+            throw new Error('Failed to fetch material list');
         }
     } catch (error) {
-        alert('Load MaterialList Failed' + error);
+        console.error('Load MaterialList Failed', error);
+        throw error;
     }
 }
-const getMaterialRequestList = async () => {
+export const getMaterialRequestList = async (): Promise<MaterialRequestDto[]>   => {
+    console.log("getMaterialRequestList");
     try {
-        console.log(API_BASE_URL);
         const response = await axios.get(API_BASE_URL + '/material-requests', {
             headers: {
                 Authorization: Cookies.get("jwt") as string
@@ -28,28 +37,35 @@ const getMaterialRequestList = async () => {
         if (response.status === 200) {
             const materialRequestList = response.data;
             return materialRequestList;
+        } else {
+            throw new Error('Failed to fetch material request list');
         }
     } catch (error) {
         alert('Load MaterialRequestList Failed' + error);
+        throw error;
     }
 }
-const getMaterialPurchaseList = async () => {
+export const getMaterialPurchaseList = async (): Promise<MaterialPurchaseDto[]> => {
+    console.log("getMaterialPurchaseList");
     try {
-        console.log(API_BASE_URL);
         const response = await axios.get(API_BASE_URL + '/material-purchases', {
             headers: {
                 Authorization: Cookies.get("jwt") as string
             }
         });
         if (response.status === 200) {
-            const MaterialPurchaseList = response.data;
-            return MaterialPurchaseList;
+            const materialPurchaseList = response.data;
+            return materialPurchaseList;
+        } else {
+            throw new Error('Failed to fetch material purchase list');
         }
     } catch (error) {
         alert('Load MaterialPurchaseList Failed' + error);
+        throw error;
     }
 }
-const getSupplierList = async () => {
+export const getSupplierList = async (): Promise <SupplierDto[]> => {
+    console.log("getSupplierList");
     try {
         const response = await axios.get(API_BASE_URL + '/suppliers', {
             headers: {
@@ -59,10 +75,235 @@ const getSupplierList = async () => {
         if (response.status === 200) {
             const supplierList = response.data;
             return supplierList;
+        } else {
+            throw new Error('Failed to fetch material purchase list');
         }
     } catch (error) {
         alert('Load SupplierList Failed' + error);
+        throw error;
     }
 }
 
-export {getMaterialList, getMaterialRequestList, getMaterialPurchaseList, getSupplierList};
+export const getMaterialContentList = async(): Promise <MaterialContentDto[]>  => {
+    console.log("getMaterialContentList");
+    try {
+        const response = await axios.get(API_BASE_URL + '/material-contents', {
+            headers: {
+                Authorization: Cookies.get("jwt") as string
+            }
+        });
+        if (response.status === 200) {
+            const materialContentList = response.data;
+            return materialContentList;
+        } else {
+            throw new Error('Failed to fetch material content list');
+        }
+    } catch (error) {
+        alert('Load materialContentList Failed' + error);
+        throw error;
+    }
+}
+
+export const addMaterial = async (materialDto: MaterialDto) => {
+    console.log("addMaterial");
+    try {
+        const response = await axios.post(
+            API_BASE_URL + '/material/materials',
+            materialDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 201) {
+            console.log('Material Added successfully');
+        } else {
+            console.error('Failed to add the Material');
+        }
+    } catch (error) {
+        console.error('Failed to add the Material:', error);
+    }
+};
+
+export const updateMaterial = async (materialId:number, materialDto: MaterialDto) => {
+    console.log("updateMaterial");
+    try {
+        const response = await axios.put(
+            API_BASE_URL + '/material/materials/' + materialId,
+            materialDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('Material updated successfully');
+        } else {
+            console.error('Failed to update the Material');
+        }
+    } catch (error) {
+        console.error('Failed to update the Material:', error);
+    }
+};
+
+export const deleteMaterial = async (materialId:number) => {
+    console.log("deleteMaterial");
+    try {
+        const response = await axios.delete(
+            API_BASE_URL + '/material/materials/' + materialId,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('Material deleted successfully');
+        } else {
+            console.error('Failed to delete the Material');
+        }
+    } catch (error) {
+        console.error('Failed to delete the Material:', error);
+    }
+};
+
+export const addMaterialRequest = async (materialRequestDto: MaterialRequestDto) => {
+    console.log("addMaterialRequest");
+    try {
+        const response = await axios.post(
+            API_BASE_URL + '/production/material-requests',
+            materialRequestDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 201) {
+            console.log('MaterialRequest Added successfully');
+        } else {
+            console.error('Failed to add the MaterialRequest');
+        }
+    } catch (error) {
+        console.error('Failed to add the MaterialRequest:', error);
+    }
+};
+
+export const updateMaterialRequest = async (materialRequestId:number, materialRequestDto: MaterialRequestDto) => {
+    console.log("updateMaterialRequest");
+    try {
+        const response = await axios.put(
+            API_BASE_URL + '/production/material-requests/' + materialRequestId,
+            materialRequestDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('MaterialRequest updated successfully');
+        } else {
+            console.error('Failed to update the MaterialRequest');
+        }
+    } catch (error) {
+        console.error('Failed to update the MaterialRequest:', error);
+    }
+};
+
+export const deleteMaterialRequest = async (materialRequestId:number) => {
+    console.log("deleteMaterialRequest");
+    try {
+        const response = await axios.delete(
+            API_BASE_URL + '/production/material-requests/' + materialRequestId,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('MaterialRequest deleted successfully');
+        } else {
+            console.error('Failed to delete the MaterialRequest');
+        }
+    } catch (error) {
+        console.error('Failed to delete the MaterialRequest:', error);
+    }
+};
+
+export const addMaterialPurchase = async (materialPurchaseDto: MaterialPurchaseDto) => {
+    console.log("addMaterialPurchase");
+    try {
+        const response = await axios.post(
+            API_BASE_URL + '/material/material-purchases',
+            materialPurchaseDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 201) {
+            console.log('MaterialPurchase Added successfully');
+        } else {
+            console.error('Failed to add the MaterialPurchase');
+        }
+    } catch (error) {
+        console.error('Failed to add the MaterialPurchase:', error);
+    }
+};
+
+export const updateMaterialPurchase = async (materialPurchaseId:number, materialPurchaseDto: MaterialPurchaseDto) => {
+    console.log("updateMaterialPurchase");
+    try {
+        const response = await axios.put(
+            API_BASE_URL + '/material/material-purchases/' + materialPurchaseId,
+            materialPurchaseDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('MaterialPurchase updated successfully');
+        } else {
+            console.error('Failed to update the MaterialPurchase');
+        }
+    } catch (error) {
+        console.error('Failed to update the MaterialPurchase:', error);
+    }
+};
+
+export const deleteMaterialPurchase = async (materialPurchaseId:number) => {
+    console.log("deleteMaterialPurchase");
+    try {
+        const response = await axios.delete(
+            API_BASE_URL + '/material/material-purchases/' + materialPurchaseId,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('MaterialPurchase deleted successfully');
+        } else {
+            console.error('Failed to delete the MaterialPurchase');
+        }
+    } catch (error) {
+        console.error('Failed to delete the MaterialPurchase:', error);
+    }
+};

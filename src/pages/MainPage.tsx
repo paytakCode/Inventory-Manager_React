@@ -3,12 +3,12 @@ import Cookies from 'js-cookie';
 import {useNavigate} from "react-router-dom";
 import Layout from "pages/Layout/Layout";
 import MainContainer from "pages/Container/MainContainer";
-import {UserInfo} from "../components/userInfo";
+import {UserInfoDto} from "../components/Base/UserInfoDto";
 
 const Main: React.FC = () => {
     const navigate = useNavigate();
     const [jwt, setJwt] = useState<string>("");
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [userInfo, setUserInfo] = useState<UserInfoDto | null>(null);
     const [containerContent, setContainerContent] = useState<string>("default");
 
     useEffect(() => {

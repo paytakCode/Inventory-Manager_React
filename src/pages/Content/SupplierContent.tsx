@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getSupplierList } from "services/materialService";
-import type {Supplier} from "components/Supplier";
+import type {SupplierDto} from "components/Base/SupplierDto";
 
 const SupplierContent = () => {
-    const [supplierList, setSupplierList] = useState<Supplier[]>([]);
+    const [supplierList, setSupplierList] = useState<SupplierDto[]>([]);
 
     useEffect(() => {
         const fetchSupplierList = async () => {

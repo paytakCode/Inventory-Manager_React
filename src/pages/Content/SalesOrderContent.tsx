@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {SalesOrder} from "components/SalesOrder";
+import {SalesOrderDto} from "components/Base/SalesOrderDto";
 import {getSalesOrderList} from "services/salesService";
 
 const SalesOrderContent = () => {
-    const [salesOrderList, setSalesOrderList] = useState<SalesOrder[]>([]);
+    const [salesOrderList, setSalesOrderList] = useState<SalesOrderDto[]>([]);
 
     useEffect(() => {
         const fetchSalesOrderList = async () => {
@@ -37,12 +37,12 @@ const SalesOrderContent = () => {
                 <tbody>
                 {salesOrderList.map((salesOrder) => (
                     <tr key={salesOrder.id}>
-                        <td>{salesOrder.productId}</td>
+                        <td>{salesOrder.productDto?.name}</td>
                         <td>{salesOrder.quantity}</td>
-                        <td>{salesOrder.managerId}</td>
-                        <td>{salesOrder.buyerId}</td>
-                        <td>{salesOrder.dueDate.toString()}</td>
-                        <td>{salesOrder.completionDate.toString()}</td>
+                        <td>{salesOrder.managerDto?.name}</td>
+                        <td>{salesOrder.buyerDto?.companyName}</td>
+                        <td>{salesOrder.dueDate?.toString()}</td>
+                        <td>{salesOrder.completionDate?.toString()}</td>
                         <td>{salesOrder.status}</td>
                     </tr>
                 ))}

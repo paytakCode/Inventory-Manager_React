@@ -6,7 +6,7 @@ import Material from "pages/Content/MaterialContent";
 import Product from "pages/Content/ProductContent";
 import Production from "pages/Content/ProductionContent";
 import SalesOrder from "pages/Content/SalesOrderContent";
-import MaterialRequest from "pages/Content/MaterialRequestContent";
+import MaterialRequestContent from "pages/Content/MaterialRequestContent";
 import MaterialPurchase from "pages/Content/MaterialPurchaseContent";
 import Supplier from "pages/Content/SupplierContent";
 import Buyer from "pages/Content/BuyerContent";
@@ -31,7 +31,7 @@ const MainContainer: React.FC<MainContainerProps> = (props) => {
         ),
         User: User,
         Material: Material,
-        MaterialRequest: MaterialRequest,
+        MaterialRequest: MaterialRequestContent,
         MaterialPurchase: MaterialPurchase,
         Supplier : Supplier,
         Buyer : Buyer,

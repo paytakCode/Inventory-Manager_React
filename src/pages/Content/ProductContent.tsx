@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getProductList } from "services/productService";
-import type {Product} from "components/Product";
+import type {ProductDto} from "components/Base/ProductDto";
 
 const ProductContent = () => {
-    const [productList, setProductList] = useState<Product[]>([]);
+    const [productList, setProductList] = useState<ProductDto[]>([]);
 
     useEffect(() => {
         const fetchProductList = async () => {

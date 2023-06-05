@@ -1,5 +1,5 @@
-export interface Buyer {
-    id: number;
+export interface SupplierDto {
+    id: number | null;
     companyName: string;
     loc: string;
     managerName: string;
