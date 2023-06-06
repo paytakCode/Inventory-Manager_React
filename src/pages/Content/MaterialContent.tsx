@@ -26,29 +26,12 @@ const MaterialContent = () => {
         spec: ""
         } as MaterialDto;
     const [formValues, setFormValues] = useState<MaterialDto>(initialValues);
-
-    useEffect(() => {
-        const fetchMaterialContentList = async () => {
-            try {
-                const fetchedMaterialContentList = await getMaterialContentList();
-                setMaterialContentList(fetchedMaterialContentList);
-            } catch (error) {
-                console.error("Failed to fetch material list:", error);
-            }
-        };
-
-        const fetchSupplierList = async () => {
-            try {
-                const fetchedSupplierList = await getSupplierList();
-                setSupplierList(fetchedSupplierList);
-            } catch (error) {
-                console.error("Failed to fetch supplier list:", error);
-            }
-        };
-
-        fetchMaterialContentList();
-        fetchSupplierList();
-    }, []);
+    let modalTitle;
+    if (editingMaterialId) {
+        modalTitle = isEditMode ? "자재 수정" : "자재 정보";
+    } else {
+        modalTitle = "자재 추가";
+    }
 
     const fetchMaterialContentList = async () => {
         try {
@@ -58,6 +41,21 @@ const MaterialContent = () => {
             console.error("Failed to fetch material list:", error);
         }
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await fetchMaterialContentList();
+
+                const fetchedSupplierList = await getSupplierList();
+                setSupplierList(fetchedSupplierList);
+            }  catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
 
     const submitAddMaterial = async () => {
@@ -126,7 +124,7 @@ const MaterialContent = () => {
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{editingMaterialId ? (!isEditMode ? "자재 정보" : "자재 수정") : "자재 추가"}</Modal.Title>
+                    <Modal.Title>{modalTitle}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -200,35 +198,36 @@ const MaterialContent = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                        {editingMaterialId ?  "닫기" : "취소"}
+                        {editingMaterialId ? "닫기" : "취소"}
                     </Button>
-                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (editingMaterialId ? (
-                        !isEditMode ? (
-                            <>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
+                        <>
+                            {editingMaterialId && !isEditMode ? (
+                                <>
+                                    <Button
+                                        variant="danger"
+                                        onClick={async () => {
+                                            if (window.confirm("정말로 이 자재를 삭제하시겠습니까?")) {
+                                                await submitDeleteMaterial();
+                                            }
+                                        }}
+                                    >
+                                        삭제
+                                    </Button>
+                                    <Button variant="primary" onClick={() => setIsEditMode(true)}>
+                                        수정
+                                    </Button>
+                                </>
+                            ) : (
                                 <Button
-                                    variant="danger"
-                                    onClick={async () => {
-                                        if (window.confirm("정말로 이 자재를 삭제하시겠습니까?")) {
-                                            await submitDeleteMaterial();
-                                        }
-                                    }}
+                                    variant="primary"
+                                    onClick={editingMaterialId ? submitUpdateMaterial : submitAddMaterial}
                                 >
-                                    삭제
+                                    {editingMaterialId ? "적용" : "추가"}
                                 </Button>
-                                <Button variant="primary" onClick={() => setIsEditMode(true)}>
-                                    수정
-                                </Button>
-                            </>
-                        ) : (
-                            <Button variant="primary" onClick={submitUpdateMaterial}>
-                                적용
-                            </Button>
-                        )
-                    ) : (
-                        <Button variant="primary" onClick={submitAddMaterial}>
-                            추가
-                        </Button>
-                    ))}
+                            )}
+                        </>
+                    )}
                 </Modal.Footer>
             </Modal>
 

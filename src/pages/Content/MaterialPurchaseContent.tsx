@@ -3,11 +3,12 @@ import {
     addMaterialPurchase,
     deleteMaterialPurchase,
     getMaterialList,
-    getMaterialPurchaseList,
+    getMaterialPurchaseContentList,
     getMaterialRequestList,
     updateMaterialPurchase
 } from "services/materialService";
 import {MaterialPurchaseDto} from "components/Base/MaterialPurchaseDto";
+import {MaterialPurchaseContentDto} from "components/MaterialPurchaseContentDto";
 import {Form, Modal, Table} from "react-bootstrap";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import Button from "react-bootstrap/Button";
@@ -19,7 +20,7 @@ import PurchaseStatus from "../../components/Base/PurchaseStatus";
 const MaterialPurchaseContent = () => {
     const currentUserInfo = getCurrentUserInfo();
     const [materialRequestList, setMaterialRequestList] = useState<MaterialRequestDto[]>([]);
-    const [materialPurchaseList, setMaterialPurchaseList] = useState<MaterialPurchaseDto[]>([]);
+    const [materialPurchaseContentList, setMaterialPurchaseContentList] = useState<MaterialPurchaseContentDto[]>([]);
     const [materialList, setMaterialList] = useState<MaterialDto[]>([]);
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
     const [show, setShow] = useState(false);
@@ -36,12 +37,26 @@ const MaterialPurchaseContent = () => {
     const [formValues, setFormValues] = useState<MaterialPurchaseDto>(initialValues);
     const [editingMaterialPurchaseId, setEditingMaterialPurchaseId] = useState<number | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    let modalTitle;
+    if (editingMaterialPurchaseId) {
+        modalTitle = isEditMode ? "구매 정보 수정" : "구매 정보";
+    } else {
+        modalTitle = "구매 추가";
+    }
+
+    const fetchMaterialPurchaseContentList = async () => {
+        try {
+            const fetchedMaterialPurchaseContentList = await getMaterialPurchaseContentList();
+            setMaterialPurchaseContentList(fetchedMaterialPurchaseContentList);
+        } catch (error) {
+            console.error("Failed to fetch material purchase Content list:", error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const fetchedMaterialPurchaseList = await getMaterialPurchaseList();
-                setMaterialPurchaseList(fetchedMaterialPurchaseList);
+                await fetchMaterialPurchaseContentList();
 
                 const fetchedMaterialList = await getMaterialList();
                 setMaterialList(fetchedMaterialList);
@@ -59,22 +74,13 @@ const MaterialPurchaseContent = () => {
         fetchData();
     }, []);
 
-    const fetchMaterialPurchaseList = async () => {
-        try {
-            const fetchedMaterialPurchaseList = await getMaterialPurchaseList();
-            setMaterialPurchaseList(fetchedMaterialPurchaseList);
-        } catch (error) {
-            console.error("Failed to fetch material purchase list:", error);
-        }
-    };
-
 
     const submitAddMaterialPurchase = async () => {
         console.log("제출전" + JSON.stringify(formValues));
         await addMaterialPurchase(formValues);
         setFormValues(initialValues);
         setShow(false);
-        await fetchMaterialPurchaseList();
+        await fetchMaterialPurchaseContentList();
     };
 
     const submitUpdateMaterialPurchase = async () => {
@@ -83,7 +89,7 @@ const MaterialPurchaseContent = () => {
             setFormValues(initialValues);
             setEditingMaterialPurchaseId(null);
             setShow(false);
-            await fetchMaterialPurchaseList();
+            await fetchMaterialPurchaseContentList();
         }
     };
 
@@ -93,7 +99,7 @@ const MaterialPurchaseContent = () => {
             setFormValues(initialValues);
             setEditingMaterialPurchaseId(null);
             setShow(false);
-            await fetchMaterialPurchaseList();
+            await fetchMaterialPurchaseContentList();
         }
     };
 
@@ -111,21 +117,21 @@ const MaterialPurchaseContent = () => {
         setShow(true);
     };
 
-    const handleShowEdit = (materialPurchase: MaterialPurchaseDto) => {
+    const handleShowEdit = (materialPurchaseContent: MaterialPurchaseContentDto) => {
         setFormValues({
-            id : materialPurchase.id,
-            materialDto: materialPurchase.materialDto,
-            managerDto: materialPurchase.managerDto,
-            materialRequestDto: materialPurchase.materialRequestDto,
-            details: materialPurchase.details,
-            lotNo: materialPurchase.lotNo,
-            price: materialPurchase.price,
-            quantity : materialPurchase.quantity,
-            status: materialPurchase.status
+            id : materialPurchaseContent.id,
+            materialDto: materialPurchaseContent.materialDto,
+            managerDto: materialPurchaseContent.managerDto,
+            materialRequestDto: materialPurchaseContent.materialRequestDto,
+            details: materialPurchaseContent.details,
+            lotNo: materialPurchaseContent.lotNo,
+            price: materialPurchaseContent.price,
+            quantity : materialPurchaseContent.quantity,
+            status: materialPurchaseContent.status
         });
         setIsEditMode(false);
-        if(materialPurchase.id){
-            setEditingMaterialPurchaseId(materialPurchase.id);
+        if(materialPurchaseContent.id){
+            setEditingMaterialPurchaseId(materialPurchaseContent.id);
         }
         setShow(true);
     };
@@ -140,7 +146,7 @@ const MaterialPurchaseContent = () => {
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{editingMaterialPurchaseId ? (!isEditMode ? "구매 정보" : "구매 정보 수정") : "구매 추가"}</Modal.Title>
+                    <Modal.Title>{modalTitle}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -207,7 +213,7 @@ const MaterialPurchaseContent = () => {
                             <Form.Label>관련 요청</Form.Label>
                             <Form.Control
                                 as="select"
-                                value={formValues.materialRequestDto?.id || 0}
+                                value={formValues.materialRequestDto?.id || ""}
                                 onChange={(e) => {
                                     const selectedRequestId = parseInt(e.target.value);
                                     const selectedMaterialRequest = materialRequestList.find(
@@ -221,7 +227,7 @@ const MaterialPurchaseContent = () => {
                                 disabled={!isEditMode}
                             >
                                 {formValues.materialRequestDto && (
-                                    <option key={formValues.materialRequestDto.id} value={formValues.materialRequestDto.id || 0}>
+                                    <option key={formValues.materialRequestDto.id} value={formValues.materialRequestDto.id || ""}>
                                         {formValues.materialRequestDto.materialDto?.name} : {formValues.materialRequestDto.quantity}
                                     </option>
                                 )}
@@ -237,7 +243,7 @@ const MaterialPurchaseContent = () => {
                                             (!formValues.materialRequestDto || materialRequest.id !== formValues.materialRequestDto.id)
                                     )
                                     .map((materialRequest) => (
-                                        <option key={materialRequest.id} value={materialRequest.id || 0}>
+                                        <option key={materialRequest.id} value={materialRequest.id || ""}>
                                             {materialRequest.materialDto?.name} : {materialRequest.quantity}
                                         </option>
                                     ))}
@@ -293,35 +299,36 @@ const MaterialPurchaseContent = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                        {editingMaterialPurchaseId ?  "닫기" : "취소"}
+                        {editingMaterialPurchaseId ? "닫기" : "취소"}
                     </Button>
-                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (editingMaterialPurchaseId ? (
-                        !isEditMode ? (
-                            <>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
+                        <>
+                            {editingMaterialPurchaseId && !isEditMode ? (
+                                <>
+                                    <Button
+                                        variant="danger"
+                                        onClick={async () => {
+                                            if (window.confirm("정말로 이 요청을 삭제하시겠습니까?")) {
+                                                await submitDeleteMaterialPurchase();
+                                            }
+                                        }}
+                                    >
+                                        삭제
+                                    </Button>
+                                    <Button variant="primary" onClick={() => setIsEditMode(true)}>
+                                        수정
+                                    </Button>
+                                </>
+                            ) : (
                                 <Button
-                                    variant="danger"
-                                    onClick={async () => {
-                                        if (window.confirm("정말로 이 요청을 삭제하시겠습니까?")) {
-                                            await submitDeleteMaterialPurchase();
-                                        }
-                                    }}
+                                    variant="primary"
+                                    onClick={editingMaterialPurchaseId ? submitUpdateMaterialPurchase : submitAddMaterialPurchase}
                                 >
-                                    삭제
+                                    {editingMaterialPurchaseId ? "적용" : "추가"}
                                 </Button>
-                                <Button variant="primary" onClick={() => setIsEditMode(true)}>
-                                    수정
-                                </Button>
-                            </>
-                        ) : (
-                            <Button variant="primary" onClick={submitUpdateMaterialPurchase}>
-                                적용
-                            </Button>
-                        )
-                    ) : (
-                        <Button variant="primary" onClick={submitAddMaterialPurchase}>
-                            추가
-                        </Button>
-                    ))}
+                            )}
+                        </>
+                    )}
                 </Modal.Footer>
             </Modal>
 
@@ -335,12 +342,12 @@ const MaterialPurchaseContent = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {materialPurchaseList.map((materialPurchase) => (
-                    <tr key={materialPurchase.id} onClick={() => handleShowEdit(materialPurchase)}>
-                        <td>{materialPurchase.materialDto?.name}</td>
-                        <td>{materialPurchase.quantity}</td>
-                        <td>{materialPurchase.managerDto?.name}</td>
-                        <td>{materialPurchase.status}</td>
+                {materialPurchaseContentList.map((materialPurchaseContent) => (
+                    <tr key={materialPurchaseContent.id} onClick={() => handleShowEdit(materialPurchaseContent)}>
+                        <td>{materialPurchaseContent.materialDto?.name}</td>
+                        <td>{materialPurchaseContent.quantity}</td>
+                        <td>{materialPurchaseContent.managerDto?.name}</td>
+                        <td>{materialPurchaseContent.status}</td>
                     </tr>
                 ))}
                 </tbody>

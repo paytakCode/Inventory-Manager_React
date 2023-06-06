@@ -5,6 +5,9 @@ import {MaterialRequestDto} from "../components/Base/MaterialRequestDto";
 import {MaterialPurchaseDto} from "../components/Base/MaterialPurchaseDto";
 import {SupplierDto} from "../components/Base/SupplierDto";
 import {MaterialContentDto} from "../components/MaterialContentDto";
+import {MaterialRequestContentDto} from "../components/MaterialRequestContentDto";
+import {MaterialPurchaseContentDto} from "../components/MaterialPurchaseContentDto";
+import {SupplierContentDto} from "../components/SupplierContentDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export const getMaterialList = async (): Promise<MaterialDto[]>  => {
@@ -100,6 +103,66 @@ export const getMaterialContentList = async(): Promise <MaterialContentDto[]>  =
         }
     } catch (error) {
         alert('Load materialContentList Failed' + error);
+        throw error;
+    }
+}
+
+export const getMaterialRequestContentList = async(): Promise <MaterialRequestContentDto[]>  => {
+    console.log("getMaterialRequestContentList");
+    try {
+        const response = await axios.get(API_BASE_URL + '/material-request-contents', {
+            headers: {
+                Authorization: Cookies.get("jwt") as string
+            }
+        });
+        if (response.status === 200) {
+            const materialRequestContentList = response.data;
+            return materialRequestContentList;
+        } else {
+            throw new Error('Failed to fetch material Request content list');
+        }
+    } catch (error) {
+        alert('Load materialRequestContentList Failed' + error);
+        throw error;
+    }
+}
+
+export const getMaterialPurchaseContentList = async(): Promise <MaterialPurchaseContentDto[]>  => {
+    console.log("getMaterialPurchaseContentList");
+    try {
+        const response = await axios.get(API_BASE_URL + '/material-purchase-contents', {
+            headers: {
+                Authorization: Cookies.get("jwt") as string
+            }
+        });
+        if (response.status === 200) {
+            const materialPurchaseContentList = response.data;
+            return materialPurchaseContentList;
+        } else {
+            throw new Error('Failed to fetch material Purchase content list');
+        }
+    } catch (error) {
+        alert('Load materialPurchaseContentList Failed' + error);
+        throw error;
+    }
+}
+
+export const getSupplierContentList = async(): Promise <SupplierContentDto[]>  => {
+    console.log("getSupplierContentList");
+    try {
+        const response = await axios.get(API_BASE_URL + '/supplier-contents', {
+            headers: {
+                Authorization: Cookies.get("jwt") as string
+            }
+        });
+        if (response.status === 200) {
+            const supplierContentList = response.data;
+            return supplierContentList;
+        } else {
+            throw new Error('Failed to fetch supplier Content list');
+        }
+    } catch (error) {
+        alert('Load supplierContentList Failed' + error);
         throw error;
     }
 }
@@ -305,5 +368,73 @@ export const deleteMaterialPurchase = async (materialPurchaseId:number) => {
         }
     } catch (error) {
         console.error('Failed to delete the MaterialPurchase:', error);
+    }
+};
+
+export const addSupplier = async (supplierDto: SupplierDto) => {
+    console.log("addSupplier");
+    try {
+        const response = await axios.post(
+            API_BASE_URL + '/material/suppliers',
+            supplierDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 201) {
+            console.log('Supplier Added successfully');
+        } else {
+            console.error('Failed to add the Supplier');
+        }
+    } catch (error) {
+        console.error('Failed to add the Supplier:', error);
+    }
+};
+
+export const updateSupplier = async (supplierId:number, supplierDto: SupplierDto) => {
+    console.log("updateSupplier");
+    try {
+        const response = await axios.put(
+            API_BASE_URL + '/material/suppliers/' + supplierId,
+            supplierDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('Supplier updated successfully');
+        } else {
+            console.error('Failed to update the Supplier');
+        }
+    } catch (error) {
+        console.error('Failed to update the Supplier:', error);
+    }
+};
+
+export const deleteSupplier = async (supplierId:number) => {
+    console.log("deleteSupplier");
+    try {
+        const response = await axios.delete(
+            API_BASE_URL + '/material/suppliers/' + supplierId,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('Supplier deleted successfully');
+        } else {
+            console.error('Failed to delete the Supplier');
+        }
+    } catch (error) {
+        console.error('Failed to delete the Supplier:', error);
     }
 };

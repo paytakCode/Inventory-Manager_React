@@ -3,19 +3,21 @@ import {
     addMaterialRequest,
     deleteMaterialRequest,
     getMaterialList,
-    getMaterialRequestList,
+    getMaterialRequestContentList,
     updateMaterialRequest
 } from "services/materialService";
-import {MaterialRequestDto} from "components/Base/MaterialRequestDto";
+import {MaterialRequestContentDto} from "components/MaterialRequestContentDto";
 import {Form, Modal, Table} from "react-bootstrap";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import Button from "react-bootstrap/Button";
 import {MaterialDto} from "components/Base/MaterialDto";
 import {UserInfoDto} from "components/Base/UserInfoDto";
+import {MaterialRequestDto} from "../../components/Base/MaterialRequestDto";
+import moment from "moment";
 
 const MaterialRequestContent = () => {
     const currentUserInfo = getCurrentUserInfo();
-    const [materialRequestList, setMaterialRequestList] = useState<MaterialRequestDto[]>([]);
+    const [materialRequestContentList, setMaterialRequestList] = useState<MaterialRequestContentDto[]>([]);
     const [materialList, setMaterialList] = useState<MaterialDto[]>([]);
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
     const [show, setShow] = useState(false);
@@ -30,48 +32,39 @@ const MaterialRequestContent = () => {
     const [formValues, setFormValues] = useState<MaterialRequestDto>(initialValues);
     const [editingMaterialRequestId, setEditingMaterialRequestId] = useState<number | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    let modalTitle;
+    if (editingMaterialRequestId) {
+        modalTitle = isEditMode ? "요청 수정" : "요청 정보";
+    } else {
+        modalTitle = "요청 추가";
+    }
+
+    const fetchMaterialRequestContentList = async () => {
+        try {
+            const fetchedMaterialRequestContentList = await getMaterialRequestContentList();
+            setMaterialRequestList(fetchedMaterialRequestContentList);
+        } catch (error) {
+            console.error("Failed to fetch material request Content list:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchMaterialRequestList = async () => {
+        const fetchData = async () => {
             try {
-                const fetchedMaterialRequestList = await getMaterialRequestList();
-                setMaterialRequestList(fetchedMaterialRequestList);
-            } catch (error) {
-                console.error("Failed to fetch material list:", error);
-            }
-        };
+                await fetchMaterialRequestContentList();
 
-        const fetchMaterialList = async () => {
-            try {
                 const fetchedMaterialList = await getMaterialList();
                 setMaterialList(fetchedMaterialList);
-            } catch (error) {
-                console.error("Failed to fetch material list:", error);
-            }
-        };
 
-        const fetchUserList = async () => {
-            try {
                 const fetchedUserList = await getUserList();
                 setUserList(fetchedUserList);
             } catch (error) {
-                console.error("Failed to fetch user list:", error);
+                console.error("Failed to fetch data:", error);
             }
         };
 
-        fetchMaterialRequestList();
-        fetchMaterialList();
-        fetchUserList();
+        fetchData();
     }, []);
-
-    const fetchMaterialRequestList = async () => {
-        try {
-            const fetchedMaterialRequestList = await getMaterialRequestList();
-            setMaterialRequestList(fetchedMaterialRequestList);
-        } catch (error) {
-            console.error("Failed to fetch material request list:", error);
-        }
-    };
 
 
     const submitAddMaterialRequest = async () => {
@@ -82,7 +75,7 @@ const MaterialRequestContent = () => {
         setFormValues(initialValues);
 
         setShow(false);
-        await fetchMaterialRequestList();
+        await fetchMaterialRequestContentList();
     };
 
     const submitUpdateMaterialRequest = async () => {
@@ -93,7 +86,7 @@ const MaterialRequestContent = () => {
 
             setEditingMaterialRequestId(null);
             setShow(false);
-            await fetchMaterialRequestList();
+            await fetchMaterialRequestContentList();
         }
     };
 
@@ -105,7 +98,7 @@ const MaterialRequestContent = () => {
 
             setEditingMaterialRequestId(null);
             setShow(false);
-            await fetchMaterialRequestList();
+            await fetchMaterialRequestContentList();
         }
     };
 
@@ -122,20 +115,20 @@ const MaterialRequestContent = () => {
         setShow(true);
     };
 
-    const handleShowEdit = (materialRequest: MaterialRequestDto) => {
+    const handleShowEdit = (materialRequestContent: MaterialRequestContentDto) => {
         setFormValues({
-            id: materialRequest.id,
-            details: materialRequest.details,
-            requesterDto: materialRequest.requesterDto,
-            quantity: materialRequest.quantity,
-            requestDate: materialRequest.requestDate,
-            materialDto: materialRequest.materialDto,
-            materialPurchaseDto: materialRequest.materialPurchaseDto
+            id: materialRequestContent.id,
+            details: materialRequestContent.details,
+            requesterDto: materialRequestContent.requesterDto,
+            quantity: materialRequestContent.quantity,
+            requestDate: materialRequestContent.requestDate,
+            materialDto: materialRequestContent.materialDto,
+            materialPurchaseDto: materialRequestContent.materialPurchaseDto
         });
 
         setIsEditMode(false);
-        if(materialRequest.id){
-            setEditingMaterialRequestId(materialRequest.id);
+        if(materialRequestContent.id){
+            setEditingMaterialRequestId(materialRequestContent.id);
         }
         setShow(true);
     };
@@ -150,7 +143,7 @@ const MaterialRequestContent = () => {
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{editingMaterialRequestId ? (!isEditMode ? "요청 정보" : "요청 수정") : "요청 추가"}</Modal.Title>
+                    <Modal.Title>{modalTitle}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -232,35 +225,36 @@ const MaterialRequestContent = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                        {editingMaterialRequestId ?  "닫기" : "취소"}
+                        {editingMaterialRequestId ? "닫기" : "취소"}
                     </Button>
-                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (editingMaterialRequestId ? (
-                        !isEditMode ? (
-                            <>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
+                        <>
+                            {editingMaterialRequestId && !isEditMode ? (
+                                <>
+                                    <Button
+                                        variant="danger"
+                                        onClick={async () => {
+                                            if (window.confirm("정말로 이 요청을 삭제하시겠습니까?")) {
+                                                await submitDeleteMaterialRequest();
+                                            }
+                                        }}
+                                    >
+                                        삭제
+                                    </Button>
+                                    <Button variant="primary" onClick={() => setIsEditMode(true)}>
+                                        수정
+                                    </Button>
+                                </>
+                            ) : (
                                 <Button
-                                    variant="danger"
-                                    onClick={async () => {
-                                        if (window.confirm("정말로 이 요청을 삭제하시겠습니까?")) {
-                                            await submitDeleteMaterialRequest();
-                                        }
-                                    }}
+                                    variant="primary"
+                                    onClick={editingMaterialRequestId ? submitUpdateMaterialRequest : submitAddMaterialRequest}
                                 >
-                                    삭제
+                                    {editingMaterialRequestId ? "적용" : "추가"}
                                 </Button>
-                                <Button variant="primary" onClick={() => setIsEditMode(true)}>
-                                    수정
-                                </Button>
-                            </>
-                        ) : (
-                            <Button variant="primary" onClick={submitUpdateMaterialRequest}>
-                                적용
-                            </Button>
-                        )
-                    ) : (
-                        <Button variant="primary" onClick={submitAddMaterialRequest}>
-                            추가
-                        </Button>
-                    ))}
+                            )}
+                        </>
+                    )}
                 </Modal.Footer>
             </Modal>
 
@@ -275,13 +269,13 @@ const MaterialRequestContent = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {materialRequestList.map((materialRequest) => (
-                    <tr key={materialRequest.id} onClick={() => handleShowEdit(materialRequest)}>
-                        <td>{materialRequest.materialDto.name}</td>
-                        <td>{materialRequest.quantity}</td>
-                        <td>{materialRequest.requesterDto.name}</td>
-                        <td>{materialRequest.requestDate?.toString()}</td>
-                        <td>{materialRequest.materialPurchaseDto?.status || "미확인"}
+                {materialRequestContentList.map((materialRequestContent) => (
+                    <tr key={materialRequestContent.id} onClick={() => handleShowEdit(materialRequestContent)}>
+                        <td>{materialRequestContent.materialDto.name}</td>
+                        <td>{materialRequestContent.quantity}</td>
+                        <td>{materialRequestContent.requesterDto.name}</td>
+                        <td>{moment(materialRequestContent.requestDate).format('YYYY-MM-DD') || ""}</td>
+                        <td>{materialRequestContent.materialPurchaseDto?.status || "미확인"}
                         </td>
                     </tr>
                 ))}
