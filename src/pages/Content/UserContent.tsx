@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { getUserList, updateUserRole } from "services/userService";
-import type { UserInfoDto } from "components/Base/UserInfoDto";
+import React, {useEffect, useState} from "react";
+import {getUserList, updateUserRole} from "services/userService";
+import type {UserInfoDto} from "components/Base/UserInfoDto";
 import Role from "components/Base/Role";
+import {Table} from "react-bootstrap";
 
 const UserContent = () => {
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
@@ -34,10 +35,9 @@ const UserContent = () => {
 
     return (
         <>
-            <div>메인 컨테이너</div>
             <div>AccountManagementContent</div>
             <div>
-                <table>
+                <Table striped bordered hover size="sm">
                     <thead>
                     <tr>
                         <th>이름</th>
@@ -54,7 +54,7 @@ const UserContent = () => {
                         />
                     ))}
                     </tbody>
-                </table>
+                </Table>
             </div>
         </>
     );
