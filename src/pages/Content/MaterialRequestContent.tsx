@@ -13,7 +13,7 @@ import Button from "react-bootstrap/Button";
 import {MaterialDto} from "components/Base/MaterialDto";
 import {UserInfoDto} from "components/Base/UserInfoDto";
 import {MaterialRequestDto} from "../../components/Base/MaterialRequestDto";
-import moment from "moment";
+import {formatDate} from "../../utils/dateUtil";
 
 const MaterialRequestContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -274,7 +274,7 @@ const MaterialRequestContent = () => {
                         <td>{materialRequestContent.materialDto.name}</td>
                         <td>{materialRequestContent.quantity}</td>
                         <td>{materialRequestContent.requesterDto.name}</td>
-                        <td>{moment(materialRequestContent.requestDate).format('YYYY-MM-DD') || ""}</td>
+                        <td>{formatDate(materialRequestContent.requestDate || new Date(''))}</td>
                         <td>{materialRequestContent.materialPurchaseDto?.status || "미확인"}
                         </td>
                     </tr>

@@ -16,6 +16,7 @@ import {UserInfoDto} from "components/Base/UserInfoDto";
 import {ProductDto} from "components/Base/ProductDto";
 import ProductionStatus from "components/Base/ProductionStatus";
 import moment from "moment";
+import {formatDate} from "../../utils/dateUtil";
 
 const ProductionContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -328,8 +329,8 @@ const ProductionContent = () => {
                         <td>{productionContent.productDto.name}</td>
                         <td>{productionContent.quantity}</td>
                         <td>{productionContent.managerDto.name}</td>
-                        <td>{moment(productionContent.targetDate).format('YYYY-MM-DD')}</td>
-                        <td>{moment(productionContent.completionDate).format('YYYY-MM-DD') || ""}</td>
+                        <td>{formatDate(productionContent.targetDate)}</td>
+                        <td>{formatDate(productionContent.completionDate || new Date(''))}</td>
                         <td>{productionContent.status}</td>
                     </tr>
                 ))}

@@ -15,9 +15,9 @@ import {getCurrentUserInfo, getUserList} from "services/userService";
 import {UserInfoDto} from "components/Base/UserInfoDto";
 import {getProductList} from "services/productService";
 import OrderStatus from "../../components/Base/OrderStatus";
-import moment from "moment";
 import {BuyerDto} from "../../components/Base/BuyerDto";
 import {ProductDto} from "../../components/Base/ProductDto";
+import {formatDate} from "../../utils/dateUtil";
 
 const SalesOrderContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -49,6 +49,7 @@ const SalesOrderContent = () => {
         dueDate: new Date()
     } as SalesOrderDto;
     const [formValues, setFormValues] = useState<SalesOrderDto>(initialValues);
+
     let modalTitle;
 
     if (editingSalesOrderId) {
@@ -56,7 +57,7 @@ const SalesOrderContent = () => {
     } else {
         modalTitle = "발주 추가";
     }
-    
+
     const fetchSalesOrderContentList = async () => {
         try {
             const fetchedSalesOrderContentList = await getSalesOrderContentList();
@@ -319,8 +320,8 @@ const SalesOrderContent = () => {
                     <th>수량</th>
                     <th>구매처</th>
                     <th>담당자</th>
-                    <th>발주날짜</th>
                     <th>진행상태</th>
+                    <th>발주날짜</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -330,8 +331,8 @@ const SalesOrderContent = () => {
                         <td>{salesOrderContent.quantity}</td>
                         <td>{salesOrderContent.buyerDto.companyName}</td>
                         <td>{salesOrderContent.managerDto.name}</td>
-                        <td>{moment(salesOrderContent.dueDate).format('YYYY-MM-DD' )}</td>
                         <td>{salesOrderContent.status}</td>
+                        <td>{formatDate(salesOrderContent.dueDate)}</td>
                     </tr>
                 ))}
                 </tbody>
