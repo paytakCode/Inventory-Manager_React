@@ -149,7 +149,7 @@ export const addSalesOrder = async (salesOrderDto: SalesOrderDto) => {
     console.log("addSalesOrder");
     try {
         const response = await axios.post(
-            API_BASE_URL + '/sales/salesOrders',
+            API_BASE_URL + '/sales/sales-orders',
             salesOrderDto,
             {
                 headers: {
@@ -172,7 +172,7 @@ export const updateSalesOrder = async (salesOrderId:number, salesOrderDto: Sales
     console.log("updateSalesOrder");
     try {
         const response = await axios.put(
-            API_BASE_URL + '/sales/salesOrders/' + salesOrderId,
+            API_BASE_URL + '/sales/sales-orders/' + salesOrderId,
             salesOrderDto,
             {
                 headers: {
@@ -195,7 +195,7 @@ export const deleteSalesOrder = async (salesOrderId:number) => {
     console.log("deleteSalesOrder");
     try {
         const response = await axios.delete(
-            API_BASE_URL + '/sales/salesOrders/' + salesOrderId,
+            API_BASE_URL + '/sales/sales-orders/' + salesOrderId,
             {
                 headers: {
                     Authorization: Cookies.get('jwt') as string,
