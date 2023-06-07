@@ -2,6 +2,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import {ProductionDto} from "../components/Base/ProductionDto";
 import {ProductDto} from "../components/Base/ProductDto";
+import {ProductMaterialDto} from "../components/Base/ProductMaterialDto";
+import {ProductMaterialIdDto} from "../components/Base/ProductMaterialIdDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export const getProductList = async () => {
@@ -81,6 +83,22 @@ export const getProductMaterialList = async () => {
         }
     } catch (error) {
         alert('Load productMaterialList Failed' + error);
+    }
+}
+
+export const getProductMaterialContentList = async () => {
+    try {
+        const response = await axios.get(API_BASE_URL + '/product-material-contents', {
+            headers: {
+                Authorization: Cookies.get("jwt") as string
+            }
+        });
+        if (response.status === 200) {
+            const productMaterialContentList = response.data;
+            return productMaterialContentList;
+        }
+    } catch (error) {
+        alert('Load ProductMaterialContentList Failed' + error);
     }
 }
 
@@ -218,5 +236,73 @@ export const deleteProduction = async (productionId: number) => {
         }
     } catch (error) {
         console.error('Failed to delete the Production:', error);
+    }
+};
+
+export const addProductMaterial = async (productMaterialDto: ProductMaterialDto) => {
+    console.log("addProductMaterial");
+    try {
+        const response = await axios.post(
+            API_BASE_URL + '/production/product-materials',
+            productMaterialDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 201) {
+            console.log('ProductMaterial Added successfully');
+        } else {
+            console.error('Failed to add the ProductMaterial');
+        }
+    } catch (error) {
+        console.error('Failed to add the ProductMaterial:', error);
+    }
+};
+
+export const updateProductMaterial = async (productMaterialIdDto: ProductMaterialIdDto, productMaterialDto: ProductMaterialDto) => {
+    console.log("updateProductMaterial");
+    try {
+        const response = await axios.put(
+            API_BASE_URL + '/production/product-materials/' + productMaterialIdDto.productDto.id + "/" + productMaterialIdDto.materialDto.id,
+            productMaterialDto,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('ProductMaterial updated successfully');
+        } else {
+            console.error('Failed to update the ProductMaterial');
+        }
+    } catch (error) {
+        console.error('Failed to update the ProductMaterial:', error);
+    }
+};
+
+export const deleteProductMaterial = async (productMaterialIdDto: ProductMaterialIdDto) => {
+    console.log("deleteProductMaterial");
+    try {
+        const response = await axios.delete(
+            API_BASE_URL + '/production/product-materials/' + productMaterialIdDto.productDto.id + "/" + productMaterialIdDto.materialDto.id,
+            {
+                headers: {
+                    Authorization: Cookies.get('jwt') as string,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (response.status === 204) {
+            console.log('ProductMaterial deleted successfully');
+        } else {
+            console.error('Failed to delete the ProductMaterial');
+        }
+    } catch (error) {
+        console.error('Failed to delete the ProductMaterial:', error);
     }
 };

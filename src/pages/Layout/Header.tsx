@@ -25,23 +25,25 @@ const Header = (props: { userInfo: UserInfoDto, onMenuSelect: (menu: string) => 
                             자재
                         </button>
                         <ul className="dropdown-menu">
-                            <li onClick={() => handleMenuClick("Material")}>자재 관리</li>
+                            <li onClick={() => handleMenuClick("Material")}>자재 목록</li>
                             <li onClick={() => handleMenuClick("MaterialRequest")}>자재 요청</li>
                             <li onClick={() => handleMenuClick("MaterialPurchase")}>자재 구매</li>
                             <li onClick={() => handleMenuClick("Supplier")}>공급처 관리</li>
                         </ul>
                     </div>
                     <div className="dropdown-center">
-                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                             제품
                         </button>
                         <ul className="dropdown-menu">
-                            <li onClick={() => handleMenuClick("Product")}>제품 관리</li>
-                            <li onClick={() => handleMenuClick("MaterialRequest")}>자재 요청</li>
+                            <li onClick={() => handleMenuClick("Product")}>제품 목록</li>
+                            <li onClick={() => handleMenuClick("ProductMaterial")}>제품 BOM</li>
                         </ul>
                     </div>
                     <div className="dropdown-center">
-                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                             생산
                         </button>
                         <ul className="dropdown-menu">
@@ -49,11 +51,12 @@ const Header = (props: { userInfo: UserInfoDto, onMenuSelect: (menu: string) => 
                         </ul>
                     </div>
                     <div className="dropdown-center">
-                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                             영업
                         </button>
                         <ul className="dropdown-menu">
-                            <li onClick={() => handleMenuClick("SalesOrder")}>발주</li>
+                            <li onClick={() => handleMenuClick("SalesOrder")}>발주 목록</li>
                             <li onClick={() => handleMenuClick("Buyer")}>구매처 관리</li>
                         </ul>
                     </div>

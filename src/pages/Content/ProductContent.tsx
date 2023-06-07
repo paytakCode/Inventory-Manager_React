@@ -196,9 +196,7 @@ const ProductContent = () => {
                 <tr>
                     <th>제품명</th>
                     <th>규격</th>
-                    <th>공급처</th>
                     <th>현재 수량</th>
-                    <th>생산 예정</th>
                     <th>생산 중</th>
                     <th>출고 예정</th>
                     <th>실제 수량</th>
@@ -209,6 +207,10 @@ const ProductContent = () => {
                     <tr key={productContent.id} onClick={() => handleShowEdit(productContent)}>
                         <td>{productContent.name}</td>
                         <td>{productContent.spec}</td>
+                        <td>{productContent.currentQuantity}</td>
+                        <td>{productContent.inProductionQuantity}</td>
+                        <td>{productContent.plannedOutboundQuantity}</td>
+                        <td>{productContent.actualQuantity}</td>
                     </tr>
                 ))}
                 </tbody>
