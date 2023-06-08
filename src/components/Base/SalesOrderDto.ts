@@ -7,6 +7,7 @@ export interface SalesOrderDto {
     id: number | null;
     productDto: ProductDto;
     quantity: number;
+    regDate: Date | null;
     managerDto: UserInfoDto;
     buyerDto: BuyerDto;
     dueDate: Date;
