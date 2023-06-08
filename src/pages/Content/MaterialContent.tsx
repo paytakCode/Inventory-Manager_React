@@ -21,10 +21,15 @@ const MaterialContent = () => {
     const [show, setShow] = useState(false);
     const [editingMaterialId, setEditingMaterialId] = useState<number | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
+
     const initialValues = {
         name: "",
         spec: ""
-        } as MaterialDto;
+    } as MaterialDto;
     const [formValues, setFormValues] = useState<MaterialDto>(initialValues);
     let modalTitle;
     if (editingMaterialId) {
@@ -49,7 +54,7 @@ const MaterialContent = () => {
 
                 const fetchedSupplierList = await getSupplierList();
                 setSupplierList(fetchedSupplierList);
-            }  catch (error) {
+            } catch (error) {
                 console.error("Failed to fetch data:", error);
             }
         };
@@ -57,6 +62,45 @@ const MaterialContent = () => {
         fetchData();
     }, []);
 
+    const sortMaterialContentList = (list: MaterialContentDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "name") {
+                return a.name.localeCompare(b.name);
+            } else if (sortBy === "spec") {
+                return a.spec.localeCompare(b.spec);
+            } else if (sortBy === "supplier") {
+                return (
+                    (a.supplierDto?.companyName || "").localeCompare(
+                        b.supplierDto?.companyName || ""
+                    )
+                );
+            } else if (sortBy === "currentQuantity" ||
+                sortBy === "expectedInboundQuantity" ||
+                sortBy === "plannedConsumptionQuantity" ||
+                sortBy === "actualQuantity") {
+                const sortValueA = a[sortBy] || 0;
+                const sortValueB = b[sortBy] || 0;
+                if (sortValueA < sortValueB) return -1;
+                if (sortValueA > sortValueB) return 1;
+                return 0;
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
 
     const submitAddMaterial = async () => {
         await addMaterial(formValues);
@@ -116,6 +160,26 @@ const MaterialContent = () => {
     return (
         <>
             <div>MaterialContent</div>
+            <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="name">자재명</option>
+                    <option value="spec">규격</option>
+                    <option value="supplier">공급처</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
+
             {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
                 <Button variant="primary" onClick={handleShowAdd}>
                     +
@@ -234,27 +298,65 @@ const MaterialContent = () => {
             <Table striped bordered hover size="sm">
                 <thead>
                 <tr>
-                    <th>자재명</th>
-                    <th>규격</th>
-                    <th>공급처</th>
-                    <th>현재 수량</th>
-                    <th>입고 예정</th>
-                    <th>소모 예정</th>
-                    <th>실제 수량</th>
+                    <th onClick={() => handleSort("name")}>
+                        자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("spec")}>
+                        규격 {sortBy === "spec" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "spec" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("supplier")}>
+                        공급처 {sortBy === "supplier" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "supplier" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("currentQuantity")}>
+                        현재 수량 {sortBy === "currentQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "currentQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("expectedInboundQuantity")}>
+                        입고 예정 {sortBy === "expectedInboundQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "expectedInboundQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("plannedConsumptionQuantity")}>
+                        소모 예정 {sortBy === "plannedConsumptionQuantity" && sortDirection === "asc" &&
+                        <span>&uarr;</span>}
+                        {sortBy === "plannedConsumptionQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("actualQuantity")}>
+                        실제 수량 {sortBy === "actualQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "actualQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+
                 </tr>
                 </thead>
                 <tbody>
-                {materialContentList.map((materialContent) => (
-                    <tr key={materialContent.id} onClick={() => handleShowEdit(materialContent)}>
-                        <td>{materialContent.name}</td>
-                        <td>{materialContent.spec}</td>
-                        <td>{materialContent.supplierDto?.companyName}</td>
-                        <td>{materialContent.currentQuantity}</td>
-                        <td>{materialContent.expectedInboundQuantity}</td>
-                        <td>{materialContent.plannedConsumptionQuantity}</td>
-                        <td>{materialContent.actualQuantity}</td>
-                    </tr>
-                ))}
+                {sortMaterialContentList(materialContentList)
+                    .filter((materialContent) => {
+                        if (searchOption === "name") {
+                            return materialContent.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "spec") {
+                            return materialContent.spec.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "supplier") {
+                            return (
+                                materialContent.supplierDto?.companyName
+                                    .toLowerCase()
+                                    .includes(searchKeyword.toLowerCase()) || searchKeyword === ""
+                            );
+                        } else {
+                            return true;
+                        }
+                    }).map((materialContent) => (
+                        <tr key={materialContent.id} onClick={() => handleShowEdit(materialContent)}>
+                            <td>{materialContent.name}</td>
+                            <td>{materialContent.spec}</td>
+                            <td>{materialContent.supplierDto?.companyName}</td>
+                            <td>{materialContent.currentQuantity}</td>
+                            <td>{materialContent.expectedInboundQuantity}</td>
+                            <td>{materialContent.plannedConsumptionQuantity}</td>
+                            <td>{materialContent.actualQuantity}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>

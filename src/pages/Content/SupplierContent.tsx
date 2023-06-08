@@ -13,6 +13,10 @@ const SupplierContent = () => {
     const [show, setShow] = useState(false);
     const [editingSupplierId, setEditingSupplierId] = useState<number | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
     const initialValues = {
         companyName: "",
         managerName: "",
@@ -49,6 +53,30 @@ const SupplierContent = () => {
         fetchData();
     }, []);
 
+    const sortSupplierContentList = (list: SupplierContentDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "companyName") {
+                return a.companyName.localeCompare(b.companyName);
+            } else if (sortBy === "managerName") {
+                return a.managerName.localeCompare(b.managerName);
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
 
     const submitAddSupplier = async () => {
         await addSupplier(formValues);
@@ -108,6 +136,24 @@ const SupplierContent = () => {
     return (
         <>
             <div>Supplier</div>
+            <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="companyName">회사명</option>
+                    <option value="managerName">담당자</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
             {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
                 <Button variant="primary" onClick={handleShowAdd}>
                     +
@@ -205,21 +251,36 @@ const SupplierContent = () => {
             <Table striped bordered hover size="sm">
                 <thead>
                 <tr>
-                    <th>회사명</th>
-                    <th>담당자</th>
+                    <th onClick={() => handleSort("companyName")}>
+                        회사명 {sortBy === "companyName" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "companyName" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("managerName")}>
+                        담당자 {sortBy === "managerName" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "managerName" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
                     <th>연락처</th>
                     <th>주소</th>
                 </tr>
                 </thead>
                 <tbody>
-                {supplierContentList.map((supplierContent) => (
-                    <tr key={supplierContent.id} onClick={() => handleShowEdit(supplierContent)}>
-                        <td>{supplierContent.companyName}</td>
-                        <td>{supplierContent.managerName}</td>
-                        <td>{supplierContent.tel}</td>
-                        <td>{supplierContent.loc}</td>
-                    </tr>
-                ))}
+                {sortSupplierContentList(supplierContentList)
+                    .filter((supplierContent) => {
+                        if (searchOption === "companyName") {
+                            return supplierContent.companyName.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "managerName") {
+                            return supplierContent.managerName.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else {
+                            return true;
+                        }
+                    }).map((supplierContent) => (
+                        <tr key={supplierContent.id} onClick={() => handleShowEdit(supplierContent)}>
+                            <td>{supplierContent.companyName}</td>
+                            <td>{supplierContent.managerName}</td>
+                            <td>{supplierContent.tel}</td>
+                            <td>{supplierContent.loc}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>

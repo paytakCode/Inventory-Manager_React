@@ -21,6 +21,10 @@ const MaterialRequestContent = () => {
     const [materialList, setMaterialList] = useState<MaterialDto[]>([]);
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
     const [show, setShow] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
     const initialValues = {
         materialDto: {
             name: "",
@@ -66,6 +70,43 @@ const MaterialRequestContent = () => {
         fetchData();
     }, []);
 
+    const sortMaterialRequestContentList = (list: MaterialRequestContentDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "name") {
+                return a.materialDto.name.localeCompare(b.materialDto.name);
+            } else if (sortBy === "requester") {
+                return a.requesterDto.name.localeCompare(b.requesterDto.name);
+            } else if (sortBy === "status") {
+                return (
+                    (a.materialPurchaseDto?.status || "").localeCompare(
+                        b.materialPurchaseDto?.status || ""
+                    )
+                );
+            } else if (sortBy === "requestDate"
+                || sortBy === "quantity") {
+                const sortValueA = a[sortBy] || 0;
+                const sortValueB = b[sortBy] || 0;
+                if (sortValueA < sortValueB) return -1;
+                if (sortValueA > sortValueB) return 1;
+                return 0;
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
 
     const submitAddMaterialRequest = async () => {
 
@@ -135,6 +176,24 @@ const MaterialRequestContent = () => {
     return (
         <>
             <div>메인 컨테이너</div>
+            <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="name">자재명</option>
+                    <option value="manager">요청자</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
             {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
                 <Button variant="primary" onClick={handleShowAdd}>
                     +
@@ -261,24 +320,48 @@ const MaterialRequestContent = () => {
             <Table striped bordered hover size="sm">
                 <thead>
                 <tr>
-                    <th>요청 자재</th>
-                    <th>수량</th>
-                    <th>요청자</th>
-                    <th>요청일</th>
-                    <th>진행 상태</th>
+                    <th onClick={() => handleSort("name")}>
+                        자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("quantity")}>
+                        요청 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("requester")}>
+                        요청자 {sortBy === "requester" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "requester" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("requestDate")}>
+                        요청일 {sortBy === "requestDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "requestDate" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("status")}>
+                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                {materialRequestContentList.map((materialRequestContent) => (
-                    <tr key={materialRequestContent.id} onClick={() => handleShowEdit(materialRequestContent)}>
-                        <td>{materialRequestContent.materialDto.name}</td>
-                        <td>{materialRequestContent.quantity}</td>
-                        <td>{materialRequestContent.requesterDto.name}</td>
-                        <td>{formatDate(materialRequestContent.requestDate || new Date(''))}</td>
-                        <td>{materialRequestContent.materialPurchaseDto?.status || "미확인"}
-                        </td>
-                    </tr>
-                ))}
+                {sortMaterialRequestContentList(materialRequestContentList)
+                    .filter((materialRequestContent) => {
+                        if (searchOption === "name") {
+                            return materialRequestContent.materialDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "manager") {
+                            return materialRequestContent.requesterDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else {
+                            return true;
+                        }
+                    }).map((materialRequestContent) => (
+                        <tr key={materialRequestContent.id} onClick={() => handleShowEdit(materialRequestContent)}>
+                            <td>{materialRequestContent.materialDto.name}</td>
+                            <td>{materialRequestContent.quantity}</td>
+                            <td>{materialRequestContent.requesterDto.name}</td>
+                            <td>{formatDate(materialRequestContent.requestDate || new Date(''))}</td>
+                            <td>{materialRequestContent.materialPurchaseDto?.status || "미확인"}
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>

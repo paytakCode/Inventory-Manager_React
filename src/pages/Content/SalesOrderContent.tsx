@@ -18,6 +18,7 @@ import OrderStatus from "../../components/Base/OrderStatus";
 import {BuyerDto} from "../../components/Base/BuyerDto";
 import {ProductDto} from "../../components/Base/ProductDto";
 import {formatDate} from "../../utils/dateUtil";
+import moment from "moment/moment";
 
 const SalesOrderContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -28,6 +29,10 @@ const SalesOrderContent = () => {
     const [show, setShow] = useState(false);
     const [editingSalesOrderId, setEditingSalesOrderId] = useState<number | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
     const initialValues = {
         buyerDto: {
             companyName: "",
@@ -89,6 +94,44 @@ const SalesOrderContent = () => {
         fetchData();
     }, []);
 
+    const sortSalesOrderContentList = (list: SalesOrderContentDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "name") {
+                return a.productDto.name.localeCompare(b.productDto.name);
+            } else if (sortBy === "companyName") {
+                return a.buyerDto.companyName.localeCompare(b.buyerDto.companyName);
+            } else if (sortBy === "manager") {
+                return a.managerDto.name.localeCompare(b.managerDto.name);
+            } else if (sortBy === "status") {
+                return (a.status || "").localeCompare(b.status || "");
+            } else if (sortBy === "regDate"
+                || sortBy === "quantity"
+                || sortBy === "completionDate"
+                || sortBy === "dueDate") {
+                const sortValueA = a[sortBy] || 0;
+                const sortValueB = b[sortBy] || 0;
+                if (sortValueA < sortValueB) return -1;
+                if (sortValueA > sortValueB) return 1;
+                return 0;
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
+
 
     const submitAddSalesOrder = async () => {
         await addSalesOrder(formValues);
@@ -136,6 +179,7 @@ const SalesOrderContent = () => {
             id: salesOrderContent.id,
             productDto: salesOrderContent.productDto,
             quantity: salesOrderContent.quantity,
+            regDate: salesOrderContent.regDate,
             managerDto: salesOrderContent.managerDto,
             buyerDto: salesOrderContent.buyerDto,
             dueDate: salesOrderContent.dueDate,
@@ -151,6 +195,25 @@ const SalesOrderContent = () => {
     return (
         <>
             <div>SalesOrder</div>
+            <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="name">제품명</option>
+                    <option value="companyName">구매처</option>
+                    <option value="manager">담당자</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
             {(currentUserInfo.role === "관리자" || currentUserInfo.role === "영업부") && (
                 <Button variant="primary" onClick={handleShowAdd}>
                     +
@@ -256,6 +319,41 @@ const SalesOrderContent = () => {
                                 )}
                             </Form.Control>
                         </Form.Group>
+                        <Form.Group className="mb-3" controlId="regDate">
+                            <Form.Label>등록 날짜</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={formValues.regDate ? moment(formValues.regDate).format('YYYY-MM-DD') : ''}
+                                onChange={(e) =>
+                                    setFormValues({...formValues, regDate: new Date(e.target.value)})
+                                }
+                                disabled={true}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="completionDate">
+                            <Form.Label>완료 날짜</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={formValues.completionDate ? moment(formValues.completionDate).format('YYYY-MM-DD') : ''}
+                                onChange={(e) =>
+                                    setFormValues({...formValues, completionDate: new Date(e.target.value)})
+                                }
+                                disabled={!isEditMode}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="dueDate">
+                            <Form.Label>기한</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={formValues.dueDate ? moment(formValues.dueDate).format('YYYY-MM-DD') : ''}
+                                onChange={(e) =>
+                                    setFormValues({...formValues, dueDate: new Date(e.target.value)})
+                                }
+                                disabled={!isEditMode}
+                            />
+                        </Form.Group>
                         <Form.Group className="mb-3" controlId="status">
                             <Form.Label>진행 상태</Form.Label>
                             <Form.Control
@@ -316,25 +414,64 @@ const SalesOrderContent = () => {
             <Table striped bordered hover size="sm">
                 <thead>
                 <tr>
-                    <th>제품명</th>
-                    <th>수량</th>
-                    <th>구매처</th>
-                    <th>담당자</th>
-                    <th>진행상태</th>
-                    <th>발주날짜</th>
+                    <th onClick={() => handleSort("name")}>
+                        제품명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("quantity")}>
+                        판매 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("companyName")}>
+                        구매처 {sortBy === "companyName" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "companyName" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("manager")}>
+                        담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("status")}>
+                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("regDate")}>
+                        등록 날짜 {sortBy === "regDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "regDate" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("completionDate")}>
+                        완료 날짜 {sortBy === "completionDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "completionDate" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("dueDate")}>
+                        기한 {sortBy === "dueDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "dueDate" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                {salesOrderContentList.map((salesOrderContent) => (
-                    <tr key={salesOrderContent.id} onClick={() => handleShowEdit(salesOrderContent)}>
-                        <td>{salesOrderContent.productDto.name}</td>
-                        <td>{salesOrderContent.quantity}</td>
-                        <td>{salesOrderContent.buyerDto.companyName}</td>
-                        <td>{salesOrderContent.managerDto.name}</td>
-                        <td>{salesOrderContent.status}</td>
-                        <td>{formatDate(salesOrderContent.dueDate)}</td>
-                    </tr>
-                ))}
+                {sortSalesOrderContentList(salesOrderContentList)
+                    .filter((salesOrderContent) => {
+                        if (searchOption === "name") {
+                            return salesOrderContent.productDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "companyName") {
+                            return salesOrderContent.buyerDto.companyName.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "manager") {
+                            return salesOrderContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else {
+                            return true;
+                        }
+                    }).map((salesOrderContent) => (
+                        <tr key={salesOrderContent.id} onClick={() => handleShowEdit(salesOrderContent)}>
+                            <td>{salesOrderContent.productDto.name}</td>
+                            <td>{salesOrderContent.quantity}</td>
+                            <td>{salesOrderContent.buyerDto.companyName}</td>
+                            <td>{salesOrderContent.managerDto.name}</td>
+                            <td>{salesOrderContent.status}</td>
+                            <td>{formatDate(salesOrderContent.regDate || new Date(""))}</td>
+                            <td>{formatDate(salesOrderContent.completionDate || new Date(""))}</td>
+                            <td>{formatDate(salesOrderContent.dueDate)}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>

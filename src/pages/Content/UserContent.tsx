@@ -6,6 +6,10 @@ import {Table} from "react-bootstrap";
 
 const UserContent = () => {
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
 
     useEffect(() => {
         const fetchUserList = async () => {
@@ -19,12 +23,37 @@ const UserContent = () => {
 
         fetchUserList();
     }, []);
+    const sortUserList = (list: UserInfoDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "name") {
+                return a.name.localeCompare(b.name);
+            } else if (sortBy === "email") {
+                return a.email.localeCompare(b.email);
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
+
 
     const handleRoleChange = async (userId: number, newRole: Role) => {
         try {
             await updateUserRole(userId, newRole);
             setUserList((prevUserList) =>
-                prevUserList.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
+                prevUserList.map((user) => (user.id === userId ? {...user, role: newRole} : user))
             );
         } catch (error) {
             console.error("Failed to update user role:", error);
@@ -37,22 +66,58 @@ const UserContent = () => {
         <>
             <div>AccountManagementContent</div>
             <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="name">이름</option>
+                    <option value="email">Email</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
+            <div>
                 <Table striped bordered hover size="sm">
                     <thead>
                     <tr>
-                        <th>이름</th>
-                        <th>Email</th>
-                        <th>부서</th>
+                        <th onClick={() => handleSort("name")}>
+                            이름 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("email")}>
+                            Email {sortBy === "email" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "email" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("role")}>
+                            부서 {sortBy === "role" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "role" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
-                    {filteredUserList.map((user) => (
-                        <UserRow
-                            key={user.id}
-                            user={user}
-                            handleRoleChange={handleRoleChange}
-                        />
-                    ))}
+                    {sortUserList(filteredUserList)
+                        .filter((user) => {
+                            if (searchOption === "name") {
+                                return user.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "email") {
+                                return user.email.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((user) => (
+                            <UserRow
+                                key={user.id}
+                                user={user}
+                                handleRoleChange={handleRoleChange}
+                            />
+                        ))}
                     </tbody>
                 </Table>
             </div>

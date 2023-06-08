@@ -23,6 +23,10 @@ const MaterialPurchaseContent = () => {
     const [materialPurchaseContentList, setMaterialPurchaseContentList] = useState<MaterialPurchaseContentDto[]>([]);
     const [materialList, setMaterialList] = useState<MaterialDto[]>([]);
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
     const [show, setShow] = useState(false);
     const initialValues = {
         materialDto: {
@@ -74,9 +78,44 @@ const MaterialPurchaseContent = () => {
         fetchData();
     }, []);
 
+    const sortMaterialPurchaseContentList = (list: MaterialPurchaseContentDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "name") {
+                return a.materialDto.name.localeCompare(b.materialDto.name);
+            } else if (sortBy === "manager") {
+                return a.managerDto.name.localeCompare(b.managerDto.name);
+            } else if (sortBy === "status") {
+                return (
+                    (a.status || "").localeCompare(
+                        b.status || ""
+                    )
+                );
+            } else if (sortBy === "quantity") {
+                const sortValueA = a[sortBy] || 0;
+                const sortValueB = b[sortBy] || 0;
+                if (sortValueA < sortValueB) return -1;
+                if (sortValueA > sortValueB) return 1;
+                return 0;
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
 
     const submitAddMaterialPurchase = async () => {
-        console.log("제출전" + JSON.stringify(formValues));
         await addMaterialPurchase(formValues);
         setFormValues(initialValues);
         setShow(false);
@@ -138,6 +177,24 @@ const MaterialPurchaseContent = () => {
     return (
         <>
             <div>메인 컨테이너</div>
+            <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="name">자재명</option>
+                    <option value="manager">담당자</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
             {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
                 <Button variant="primary" onClick={handleShowAdd}>
                     +
@@ -335,21 +392,42 @@ const MaterialPurchaseContent = () => {
             <Table striped bordered hover size="sm">
                 <thead>
                 <tr>
-                    <th>구매 자재</th>
-                    <th>수량</th>
-                    <th>담당자</th>
-                    <th>진행 상태</th>
+                    <th onClick={() => handleSort("name")}>
+                        자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("quantity")}>
+                        구매 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("manager")}>
+                        담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("status")}>
+                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                {materialPurchaseContentList.map((materialPurchaseContent) => (
-                    <tr key={materialPurchaseContent.id} onClick={() => handleShowEdit(materialPurchaseContent)}>
-                        <td>{materialPurchaseContent.materialDto?.name}</td>
-                        <td>{materialPurchaseContent.quantity}</td>
-                        <td>{materialPurchaseContent.managerDto?.name}</td>
-                        <td>{materialPurchaseContent.status}</td>
-                    </tr>
-                ))}
+                {sortMaterialPurchaseContentList(materialPurchaseContentList)
+                    .filter((materialPurchaseContent) => {
+                        if (searchOption === "name") {
+                            return materialPurchaseContent.materialDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else if (searchOption === "manager") {
+                            return materialPurchaseContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else {
+                            return true;
+                        }
+                    }).map((materialPurchaseContent) => (
+                        <tr key={materialPurchaseContent.id} onClick={() => handleShowEdit(materialPurchaseContent)}>
+                            <td>{materialPurchaseContent.materialDto.name}</td>
+                            <td>{materialPurchaseContent.quantity}</td>
+                            <td>{materialPurchaseContent.managerDto.name}</td>
+                            <td>{materialPurchaseContent.status}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>

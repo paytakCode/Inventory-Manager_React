@@ -13,6 +13,10 @@ const ProductContent = () => {
     const [show, setShow] = useState(false);
     const [editingProductId, setEditingProductId] = useState<number | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortDirection, setSortDirection] = useState<string>("asc");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchOption, setSearchOption] = useState("");
     const initialValues = {
         name: "",
         spec: ""
@@ -46,6 +50,39 @@ const ProductContent = () => {
         fetchData();
     }, []);
 
+    const sortProductContentList = (list: ProductContentDto[]) => {
+        const sortedList = [...list].sort((a, b) => {
+            if (sortBy === "name") {
+                return a.name.localeCompare(b.name);
+            } else if (sortBy === "spec") {
+                return (a.spec || "").localeCompare(b.spec || "");
+            } else if (sortBy === "currentQuantity"
+                || sortBy === "inProductionQuantity"
+                || sortBy === "plannedOutboundQuantity"
+                || sortBy === "actualQuantity") {
+                const sortValueA = a[sortBy] || 0;
+                const sortValueB = b[sortBy] || 0;
+                if (sortValueA < sortValueB) return -1;
+                if (sortValueA > sortValueB) return 1;
+                return 0;
+            } else {
+                return 0;
+            }
+        });
+
+        return sortDirection === "desc" ? sortedList.reverse() : sortedList;
+    };
+
+
+    const handleSort = (column: string) => {
+        setSearchKeyword("");
+        if (column === sortBy) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
 
     const submitAddProduct = async () => {
         await addProduct(formValues);
@@ -104,6 +141,23 @@ const ProductContent = () => {
     return (
         <>
             <div>ProductContent</div>
+            <div>
+                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
+                    <option value="" disabled={true}>검색 옵션</option>
+                    <option value="name">제품명</option>
+                </select>
+                <input
+                    type="text"
+                    value={searchKeyword}
+                    placeholder="검색어를 입력하세요"
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+                <button onClick={() => {
+                    setSearchKeyword("");
+                }}>
+                    초기화
+                </button>
+            </div>
             {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
                 <Button variant="primary" onClick={handleShowAdd}>
                     +
@@ -194,25 +248,50 @@ const ProductContent = () => {
             <Table striped bordered hover size="sm">
                 <thead>
                 <tr>
-                    <th>제품명</th>
-                    <th>규격</th>
-                    <th>현재 수량</th>
-                    <th>생산 중</th>
-                    <th>출고 예정</th>
-                    <th>실제 수량</th>
+                    <th onClick={() => handleSort("name")}>
+                        제품명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("spec")}>
+                        규격 {sortBy === "spec" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "spec" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("currentQuantity")}>
+                        현재 수량 {sortBy === "currentQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "currentQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("inProductionQuantity")}>
+                        생산 중 {sortBy === "inProductionQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "inProductionQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("plannedOutboundQuantity")}>
+                        출고 예정 {sortBy === "plannedOutboundQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "plannedOutboundQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
+                    <th onClick={() => handleSort("actualQuantity")}>
+                        실제 수량 {sortBy === "actualQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                        {sortBy === "actualQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
-                {productContentList.map((productContent) => (
-                    <tr key={productContent.id} onClick={() => handleShowEdit(productContent)}>
-                        <td>{productContent.name}</td>
-                        <td>{productContent.spec}</td>
-                        <td>{productContent.currentQuantity}</td>
-                        <td>{productContent.inProductionQuantity}</td>
-                        <td>{productContent.plannedOutboundQuantity}</td>
-                        <td>{productContent.actualQuantity}</td>
-                    </tr>
-                ))}
+                {sortProductContentList(productContentList)
+                    .filter((productContent) => {
+                        if (searchOption === "name") {
+                            return productContent.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                        } else {
+                            return true;
+                        }
+                    }).map((productContent) => (
+                        <tr key={productContent.id} onClick={() => handleShowEdit(productContent)}>
+                            <td>{productContent.name}</td>
+                            <td>{productContent.spec}</td>
+                            <td>{productContent.currentQuantity}</td>
+                            <td>{productContent.inProductionQuantity}</td>
+                            <td>{productContent.plannedOutboundQuantity}</td>
+                            <td>{productContent.actualQuantity}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </>
