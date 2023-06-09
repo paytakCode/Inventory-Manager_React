@@ -6,14 +6,15 @@ import {
     getMaterialRequestContentList,
     updateMaterialRequest
 } from "services/materialService";
-import {MaterialRequestContentDto} from "components/MaterialRequestContentDto";
+import {MaterialRequestContentDto} from "components/Content/MaterialRequestContentDto";
 import {Form, Modal, Table} from "react-bootstrap";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import Button from "react-bootstrap/Button";
 import {MaterialDto} from "components/Base/MaterialDto";
 import {UserInfoDto} from "components/Base/UserInfoDto";
-import {MaterialRequestDto} from "../../components/Base/MaterialRequestDto";
-import {formatDate} from "../../utils/dateUtil";
+import {MaterialRequestDto} from "components/Base/MaterialRequestDto";
+import {formatDate} from "utils/dateUtil";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const MaterialRequestContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -174,9 +175,16 @@ const MaterialRequestContent = () => {
         setShow(true);
     };
     return (
-        <>
-            <div>메인 컨테이너</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>자재 - 자재 요청</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
+                        <Button variant="primary" onClick={handleShowAdd}>
+                            +
+                        </Button>
+                    )}
+                </div>
                 <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="name">자재명</option>
@@ -194,11 +202,6 @@ const MaterialRequestContent = () => {
                     초기화
                 </button>
             </div>
-            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
-                <Button variant="primary" onClick={handleShowAdd}>
-                    +
-                </Button>
-            )}
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -316,55 +319,56 @@ const MaterialRequestContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
-
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleSort("name")}>
-                        자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("quantity")}>
-                        요청 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("requester")}>
-                        요청자 {sortBy === "requester" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "requester" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("requestDate")}>
-                        요청일 {sortBy === "requestDate" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "requestDate" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("status")}>
-                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {sortMaterialRequestContentList(materialRequestContentList)
-                    .filter((materialRequestContent) => {
-                        if (searchOption === "name") {
-                            return materialRequestContent.materialDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "manager") {
-                            return materialRequestContent.requesterDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else {
-                            return true;
-                        }
-                    }).map((materialRequestContent) => (
-                        <tr key={materialRequestContent.id} onClick={() => handleShowEdit(materialRequestContent)}>
-                            <td>{materialRequestContent.materialDto.name}</td>
-                            <td>{materialRequestContent.quantity}</td>
-                            <td>{materialRequestContent.requesterDto.name}</td>
-                            <td>{formatDate(materialRequestContent.requestDate || new Date(''))}</td>
-                            <td>{materialRequestContent.materialPurchaseDto?.status || "미확인"}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th onClick={() => handleSort("name")}>
+                            자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("quantity")}>
+                            요청 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("requester")}>
+                            요청자 {sortBy === "requester" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "requester" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("requestDate")}>
+                            요청일 {sortBy === "requestDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "requestDate" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("status")}>
+                            진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortMaterialRequestContentList(materialRequestContentList)
+                        .filter((materialRequestContent) => {
+                            if (searchOption === "name") {
+                                return materialRequestContent.materialDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "manager") {
+                                return materialRequestContent.requesterDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((materialRequestContent) => (
+                            <tr key={materialRequestContent.id} onClick={() => handleShowEdit(materialRequestContent)}>
+                                <td>{materialRequestContent.materialDto.name}</td>
+                                <td>{materialRequestContent.quantity}</td>
+                                <td>{materialRequestContent.requesterDto.name}</td>
+                                <td>{formatDate(materialRequestContent.requestDate || new Date(''))}</td>
+                                <td>{materialRequestContent.materialPurchaseDto?.status || "미확인"}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>
     );
 };
 

@@ -1,0 +1,42 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.searchContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  place-self: normal;
+}
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tableContainer table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.tableContainer th,
+.tableContainer td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addButton {
+  margin-right: auto;
+}

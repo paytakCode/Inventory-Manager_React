@@ -10,11 +10,12 @@ import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
 import {getCurrentUserInfo} from "services/userService";
 import {ProductMaterialDto} from "components/Base/ProductMaterialDto";
-import {ProductMaterialContentDto} from "components/ProductMaterialContentDto";
+import {ProductMaterialContentDto} from "components/Content/ProductMaterialContentDto";
 import {ProductMaterialIdDto} from "../../components/Base/ProductMaterialIdDto";
 import {MaterialDto} from "../../components/Base/MaterialDto";
 import {getMaterialContentList, getMaterialList} from "../../services/materialService";
-import {MaterialContentDto} from "../../components/MaterialContentDto";
+import {MaterialContentDto} from "../../components/Content/MaterialContentDto";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const ProductMaterialContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -210,9 +211,10 @@ const ProductMaterialContent = () => {
     };
 
     return (
-        <>
-            <div>ProductMaterialContent</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>제품 - 제품 BOM</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}></div>
                 <select value={productSearchOption} onChange={(e) => setProductSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="productName">제품명</option>
@@ -229,12 +231,29 @@ const ProductMaterialContent = () => {
                     초기화
                 </button>
             </div>
-            <Modal show={showBom} onHide={handleCloseBOM}>
+            <Modal show={showBom} onHide={handleCloseBOM} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>{selectedProductName}의 자재 목록</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <div>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="quantity">
+                            <Form.Label>생산 예정 수량</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={productQuantity}
+                                onChange={(e) => setProductQuantity(parseInt(e.target.value))}
+                            />
+                        </Form.Group>
+                    </Form>
+                    <div className={styles.searchContainer}>
+                        <div className={styles.addButton}>
+                            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
+                                <Button variant="primary" onClick={handleShowAdd}>
+                                    +
+                                </Button>
+                            )}
+                        </div>
                         <select value={materialSearchOption} onChange={(e) => setMaterialSearchOption(e.target.value)}>
                             <option value="" disabled={true}>검색 옵션</option>
                             <option value="materialName">자재명</option>
@@ -251,129 +270,120 @@ const ProductMaterialContent = () => {
                             초기화
                         </button>
                     </div>
-                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
-                        <Button variant="primary" onClick={handleShowAdd}>
-                            +
-                        </Button>
-                    )}
-                    <Form>
-                        <Form.Group className="mb-3" controlId="quantity">
-                            <Form.Label>생산 예정 수량</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={productQuantity}
-                                onChange={(e) => setProductQuantity(parseInt(e.target.value))}
-                            />
-                        </Form.Group>
-                    </Form>
                     {selectedProductId && productMaterialListMap.has(selectedProductId) && (
-                        <Table striped bordered hover size="sm">
-                            <thead>
-                            <tr>
-                                <th onClick={() => handleMaterialSort("materialName")}>
-                                    자재명 {materialSortBy === "materialName" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "materialName" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th onClick={() => handleMaterialSort("spec")}>
-                                    규격 {materialSortBy === "spec" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "spec" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th onClick={() => handleMaterialSort("requiredQuantity")}>
-                                    필요 수량 {materialSortBy === "requiredQuantity" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "requiredQuantity" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th onClick={() => handleMaterialSort("currentQuantity")}>
-                                    현재 수량 {materialSortBy === "currentQuantity" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "currentQuantity" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th onClick={() => handleMaterialSort("expectedInboundQuantity")}>
-                                    입고
-                                    수량 {materialSortBy === "expectedInboundQuantity" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "expectedInboundQuantity" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th onClick={() => handleMaterialSort("plannedConsumptionQuantity")}>
-                                    소모
-                                    예정 {materialSortBy === "plannedConsumptionQuantity" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "plannedConsumptionQuantity" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th onClick={() => handleMaterialSort("actualQuantity")}>
-                                    실제 수량 {materialSortBy === "actualQuantity" && materialSortDirection === "asc" &&
-                                    <span>&uarr;</span>}
-                                    {materialSortBy === "actualQuantity" && materialSortDirection === "desc" &&
-                                        <span>&darr;</span>}
-                                </th>
-                                <th>총 필요 수량</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {sortProductMaterialList(productMaterialListMap.get(selectedProductId) || [])
-                                .filter((productMaterial) => {
-                                    if (materialSearchOption === "materialName") {
-                                        return productMaterial.productMaterialIdDto.materialDto.name.toLowerCase().includes(materialSearchKeyword.toLowerCase());
-                                    } else {
-                                        return true;
-                                    }
-                                }).map((productMaterial) => (
-                                    <tr key={productMaterial.productMaterialIdDto.materialDto.id}
-                                        onClick={() => handleShowEdit(productMaterial)}>
-                                        <td>{productMaterial.productMaterialIdDto.materialDto.name}</td>
-                                        <td>{productMaterial.productMaterialIdDto.materialDto.spec}</td>
-                                        <td>{productMaterial.requiredQuantity}</td>
-                                        <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.currentQuantity}</td>
-                                        <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.expectedInboundQuantity}</td>
-                                        <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.plannedConsumptionQuantity}</td>
-                                        <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.actualQuantity}</td>
-                                        <td>{productMaterial.requiredQuantity * productQuantity}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
+                        <div className={styles.tableContainer}>
+                            <Table striped bordered hover size="sm">
+                                <thead>
+                                <tr>
+                                    <th onClick={() => handleMaterialSort("materialName")}>
+                                        자재명 {materialSortBy === "materialName" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "materialName" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th onClick={() => handleMaterialSort("spec")}>
+                                        규격 {materialSortBy === "spec" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "spec" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th onClick={() => handleMaterialSort("requiredQuantity")}>
+                                        필요
+                                        수량 {materialSortBy === "requiredQuantity" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "requiredQuantity" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th onClick={() => handleMaterialSort("currentQuantity")}>
+                                        현재
+                                        수량 {materialSortBy === "currentQuantity" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "currentQuantity" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th onClick={() => handleMaterialSort("expectedInboundQuantity")}>
+                                        입고
+                                        수량 {materialSortBy === "expectedInboundQuantity" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "expectedInboundQuantity" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th onClick={() => handleMaterialSort("plannedConsumptionQuantity")}>
+                                        소모
+                                        예정 {materialSortBy === "plannedConsumptionQuantity" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "plannedConsumptionQuantity" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th onClick={() => handleMaterialSort("actualQuantity")}>
+                                        실제 수량 {materialSortBy === "actualQuantity" && materialSortDirection === "asc" &&
+                                        <span>&uarr;</span>}
+                                        {materialSortBy === "actualQuantity" && materialSortDirection === "desc" &&
+                                            <span>&darr;</span>}
+                                    </th>
+                                    <th>총 필요 수량</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {sortProductMaterialList(productMaterialListMap.get(selectedProductId) || [])
+                                    .filter((productMaterial) => {
+                                        if (materialSearchOption === "materialName") {
+                                            return productMaterial.productMaterialIdDto.materialDto.name.toLowerCase().includes(materialSearchKeyword.toLowerCase());
+                                        } else {
+                                            return true;
+                                        }
+                                    }).map((productMaterial) => (
+                                        <tr key={productMaterial.productMaterialIdDto.materialDto.id}
+                                            onClick={() => handleShowEdit(productMaterial)}>
+                                            <td>{productMaterial.productMaterialIdDto.materialDto.name}</td>
+                                            <td>{productMaterial.productMaterialIdDto.materialDto.spec}</td>
+                                            <td>{productMaterial.requiredQuantity}</td>
+                                            <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.currentQuantity}</td>
+                                            <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.expectedInboundQuantity}</td>
+                                            <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.plannedConsumptionQuantity}</td>
+                                            <td>{materialContentMap.get(productMaterial.productMaterialIdDto.materialDto.id as number)?.actualQuantity}</td>
+                                            <td>{productMaterial.requiredQuantity * productQuantity}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </div>
                     )}
                 </Modal.Body>
             </Modal>
-
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleProductSort("productName")}>
-                        제품명 {productSortBy === "productName" && productSortDirection === "asc" && <span>&uarr;</span>}
-                        {productSortBy === "productName" && productSortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleProductSort("spec")}>
-                        규격 {productSortBy === "spec" && productSortDirection === "asc" && <span>&uarr;</span>}
-                        {productSortBy === "spec" && productSortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {sortProductMaterialContentList(productMaterialContentList)
-                    .filter((productionContent) => {
-                        if (productSearchOption === "productName") {
-                            return productionContent.productDto.name.toLowerCase().includes(productSearchKeyword.toLowerCase());
-                        } else {
-                            return true;
-                        }
-                    }).map((productMaterialContent) => (
-                        <tr key={productMaterialContent.productDto.id}
-                            onClick={() => handleShowBOM(productMaterialContent.productDto.name, productMaterialContent.productDto.id || 0)}>
-                            <td>{productMaterialContent.productDto.name}</td>
-                            <td>{productMaterialContent.productDto.spec}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th onClick={() => handleProductSort("productName")}>
+                            제품명 {productSortBy === "productName" && productSortDirection === "asc" &&
+                            <span>&uarr;</span>}
+                            {productSortBy === "productName" && productSortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleProductSort("spec")}>
+                            규격 {productSortBy === "spec" && productSortDirection === "asc" && <span>&uarr;</span>}
+                            {productSortBy === "spec" && productSortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortProductMaterialContentList(productMaterialContentList)
+                        .filter((productionContent) => {
+                            if (productSearchOption === "productName") {
+                                return productionContent.productDto.name.toLowerCase().includes(productSearchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((productMaterialContent) => (
+                            <tr key={productMaterialContent.productDto.id}
+                                onClick={() => handleShowBOM(productMaterialContent.productDto.name, productMaterialContent.productDto.id || 0)}>
+                                <td>{productMaterialContent.productDto.name}</td>
+                                <td>{productMaterialContent.productDto.spec}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -463,7 +473,7 @@ const ProductMaterialContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
-        </>
+        </div>
     );
 };
 

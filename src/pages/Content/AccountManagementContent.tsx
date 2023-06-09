@@ -3,8 +3,9 @@ import {getUserList, updateUserRole} from "services/userService";
 import type {UserInfoDto} from "components/Base/UserInfoDto";
 import Role from "components/Base/Role";
 import {Table} from "react-bootstrap";
+import styles from "pages/Content/CommonContent.module.scss";
 
-const UserContent = () => {
+const AccountManagementContent = () => {
     const [userList, setUserList] = useState<UserInfoDto[]>([]);
     const [sortBy, setSortBy] = useState<string | undefined>(undefined);
     const [sortDirection, setSortDirection] = useState<string>("asc");
@@ -29,6 +30,8 @@ const UserContent = () => {
                 return a.name.localeCompare(b.name);
             } else if (sortBy === "email") {
                 return a.email.localeCompare(b.email);
+            } else if (sortBy === "role") {
+                return a.role.localeCompare(b.role);
             } else {
                 return 0;
             }
@@ -63,11 +66,17 @@ const UserContent = () => {
     const filteredUserList = userList.filter((user) => user.role !== Role.Admin);
 
     return (
-        <>
-            <div>AccountManagementContent</div>
-            <div>
-                <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
-                    <option value="" disabled={true}>검색 옵션</option>
+        <div className={styles.content}>
+            <div className={styles.title}>관리자 - 직원 관리</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}></div>
+                <select
+                    value={searchOption}
+                    onChange={(e) => setSearchOption(e.target.value)}
+                >
+                    <option value="" disabled={true}>
+                        검색 옵션
+                    </option>
                     <option value="name">이름</option>
                     <option value="email">Email</option>
                 </select>
@@ -77,26 +86,25 @@ const UserContent = () => {
                     placeholder="검색어를 입력하세요"
                     onChange={(e) => setSearchKeyword(e.target.value)}
                 />
-                <button onClick={() => {
-                    setSearchKeyword("");
-                }}>
-                    초기화
-                </button>
+                <button onClick={() => setSearchKeyword("")}>초기화</button>
             </div>
-            <div>
-                <Table striped bordered hover size="sm">
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover>
                     <thead>
                     <tr>
                         <th onClick={() => handleSort("name")}>
-                            이름 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            이름{" "}
+                            {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
                             {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
                         </th>
                         <th onClick={() => handleSort("email")}>
-                            Email {sortBy === "email" && sortDirection === "asc" && <span>&uarr;</span>}
+                            Email{" "}
+                            {sortBy === "email" && sortDirection === "asc" && <span>&uarr;</span>}
                             {sortBy === "email" && sortDirection === "desc" && <span>&darr;</span>}
                         </th>
                         <th onClick={() => handleSort("role")}>
-                            부서 {sortBy === "role" && sortDirection === "asc" && <span>&uarr;</span>}
+                            부서{" "}
+                            {sortBy === "role" && sortDirection === "asc" && <span>&uarr;</span>}
                             {sortBy === "role" && sortDirection === "desc" && <span>&darr;</span>}
                         </th>
                     </tr>
@@ -111,7 +119,8 @@ const UserContent = () => {
                             } else {
                                 return true;
                             }
-                        }).map((user) => (
+                        })
+                        .map((user) => (
                             <UserRow
                                 key={user.id}
                                 user={user}
@@ -121,7 +130,7 @@ const UserContent = () => {
                     </tbody>
                 </Table>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -151,4 +160,4 @@ const UserRow: React.FC<UserRowProps> = ({ user, handleRoleChange }) => {
     );
 };
 
-export default UserContent;
+export default AccountManagementContent;

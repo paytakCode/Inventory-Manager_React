@@ -4,8 +4,9 @@ import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
 import {SupplierDto} from "../../components/Base/SupplierDto";
-import {SupplierContentDto} from "../../components/SupplierContentDto";
+import {SupplierContentDto} from "../../components/Content/SupplierContentDto";
 import {getCurrentUserInfo} from "../../services/userService";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const SupplierContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -134,9 +135,16 @@ const SupplierContent = () => {
     };
 
     return (
-        <>
-            <div>Supplier</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>자재 - 공급처 관리</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
+                        <Button variant="primary" onClick={handleShowAdd}>
+                            +
+                        </Button>
+                    )}
+                </div>
                 <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="companyName">회사명</option>
@@ -154,11 +162,6 @@ const SupplierContent = () => {
                     초기화
                 </button>
             </div>
-            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
-                <Button variant="primary" onClick={handleShowAdd}>
-                    +
-                </Button>
-            )}
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -247,43 +250,44 @@ const SupplierContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
-
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleSort("companyName")}>
-                        회사명 {sortBy === "companyName" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "companyName" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("managerName")}>
-                        담당자 {sortBy === "managerName" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "managerName" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th>연락처</th>
-                    <th>주소</th>
-                </tr>
-                </thead>
-                <tbody>
-                {sortSupplierContentList(supplierContentList)
-                    .filter((supplierContent) => {
-                        if (searchOption === "companyName") {
-                            return supplierContent.companyName.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "managerName") {
-                            return supplierContent.managerName.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else {
-                            return true;
-                        }
-                    }).map((supplierContent) => (
-                        <tr key={supplierContent.id} onClick={() => handleShowEdit(supplierContent)}>
-                            <td>{supplierContent.companyName}</td>
-                            <td>{supplierContent.managerName}</td>
-                            <td>{supplierContent.tel}</td>
-                            <td>{supplierContent.loc}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th style={{width: "20%"}} onClick={() => handleSort("companyName")}>
+                            회사명 {sortBy === "companyName" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "companyName" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th style={{width: "20%"}} onClick={() => handleSort("managerName")}>
+                            담당자 {sortBy === "managerName" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "managerName" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th style={{width: "20%"}}>연락처</th>
+                        <th style={{width: "40%"}}>주소</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortSupplierContentList(supplierContentList)
+                        .filter((supplierContent) => {
+                            if (searchOption === "companyName") {
+                                return supplierContent.companyName.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "managerName") {
+                                return supplierContent.managerName.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((supplierContent) => (
+                            <tr key={supplierContent.id} onClick={() => handleShowEdit(supplierContent)}>
+                                <td>{supplierContent.companyName}</td>
+                                <td>{supplierContent.managerName}</td>
+                                <td>{supplierContent.tel}</td>
+                                <td>{supplierContent.loc}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>
     );
 };
 

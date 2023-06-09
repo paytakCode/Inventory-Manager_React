@@ -10,7 +10,7 @@ interface LoginData {
     password: string;
 }
 
-const setUserInfoToCookie = (authorization: string) => {
+export const setUserInfoToCookie = (authorization: string) => {
     const expiresHours = 9;
     const expirationDate = new Date(new Date().getTime() + expiresHours * 60 * 60 * 1000);
     const userInfo: UserInfoDto = jwt_decode(authorization);
@@ -18,7 +18,7 @@ const setUserInfoToCookie = (authorization: string) => {
     Cookies.set("userInfo", JSON.stringify(userInfo), {expires: expirationDate});
 };
 
-const login = async (loginData: LoginData, navigate: any) => {
+export const login = async (loginData: LoginData) => {
 
     try {
         const response = await axios.post(API_BASE_URL + '/login', loginData);
@@ -26,15 +26,14 @@ const login = async (loginData: LoginData, navigate: any) => {
             console.log(response.headers['authorization']);
             const authorization = response.headers['authorization'];
             setUserInfoToCookie(authorization);
-            navigate("/main");
         }
+        return response;
     } catch (error) {
-        alert('Login failed');
-        navigate("/login");
+        alert('로그인에 실패하였습니다. 계정 정보를 확인해주세요.');
     }
 };
 
-const logout = async (navigate: any) => {
+export const logout = async () => {
 
     try {
         const response = await axios.post(API_BASE_URL + '/logout', {}, {
@@ -46,11 +45,13 @@ const logout = async (navigate: any) => {
             Cookies.remove("jwt");
             Cookies.remove("userInfo");
             alert("로그아웃 되었습니다.");
-            navigate("/login");
         }
     } catch (error) {
         alert('Logout failed');
     }
 };
 
-export {setUserInfoToCookie, login, logout};
+export const isLogined = () => {
+    return Cookies.get("jwt");
+}
+

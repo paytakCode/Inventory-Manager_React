@@ -1,4 +1,4 @@
-import {SupplierDto} from "./Base/SupplierDto";
+import {SupplierDto} from "../Base/SupplierDto";
 
 export interface SupplierContentDto extends SupplierDto{
 }

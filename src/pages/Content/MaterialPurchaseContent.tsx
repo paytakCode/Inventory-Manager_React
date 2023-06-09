@@ -8,7 +8,7 @@ import {
     updateMaterialPurchase
 } from "services/materialService";
 import {MaterialPurchaseDto} from "components/Base/MaterialPurchaseDto";
-import {MaterialPurchaseContentDto} from "components/MaterialPurchaseContentDto";
+import {MaterialPurchaseContentDto} from "components/Content/MaterialPurchaseContentDto";
 import {Form, Modal, Table} from "react-bootstrap";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import Button from "react-bootstrap/Button";
@@ -16,6 +16,7 @@ import {MaterialDto} from "components/Base/MaterialDto";
 import {UserInfoDto} from "components/Base/UserInfoDto";
 import {MaterialRequestDto} from "../../components/Base/MaterialRequestDto";
 import PurchaseStatus from "../../components/Base/PurchaseStatus";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const MaterialPurchaseContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -175,9 +176,16 @@ const MaterialPurchaseContent = () => {
         setShow(true);
     };
     return (
-        <>
-            <div>메인 컨테이너</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>자재 - 자재 구매</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
+                        <Button variant="primary" onClick={handleShowAdd}>
+                            +
+                        </Button>
+                    )}
+                </div>
                 <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="name">자재명</option>
@@ -195,11 +203,6 @@ const MaterialPurchaseContent = () => {
                     초기화
                 </button>
             </div>
-            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
-                <Button variant="primary" onClick={handleShowAdd}>
-                    +
-                </Button>
-            )}
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -388,49 +391,51 @@ const MaterialPurchaseContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
-
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleSort("name")}>
-                        자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("quantity")}>
-                        구매 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("manager")}>
-                        담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("status")}>
-                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {sortMaterialPurchaseContentList(materialPurchaseContentList)
-                    .filter((materialPurchaseContent) => {
-                        if (searchOption === "name") {
-                            return materialPurchaseContent.materialDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "manager") {
-                            return materialPurchaseContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else {
-                            return true;
-                        }
-                    }).map((materialPurchaseContent) => (
-                        <tr key={materialPurchaseContent.id} onClick={() => handleShowEdit(materialPurchaseContent)}>
-                            <td>{materialPurchaseContent.materialDto.name}</td>
-                            <td>{materialPurchaseContent.quantity}</td>
-                            <td>{materialPurchaseContent.managerDto.name}</td>
-                            <td>{materialPurchaseContent.status}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th onClick={() => handleSort("name")}>
+                            자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("quantity")}>
+                            구매 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("manager")}>
+                            담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("status")}>
+                            진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortMaterialPurchaseContentList(materialPurchaseContentList)
+                        .filter((materialPurchaseContent) => {
+                            if (searchOption === "name") {
+                                return materialPurchaseContent.materialDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "manager") {
+                                return materialPurchaseContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((materialPurchaseContent) => (
+                            <tr key={materialPurchaseContent.id}
+                                onClick={() => handleShowEdit(materialPurchaseContent)}>
+                                <td>{materialPurchaseContent.materialDto.name}</td>
+                                <td>{materialPurchaseContent.quantity}</td>
+                                <td>{materialPurchaseContent.managerDto.name}</td>
+                                <td>{materialPurchaseContent.status}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>
     );
 };
 

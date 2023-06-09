@@ -1,4 +1,4 @@
-import {ProductDto} from "./Base/ProductDto";
+import {ProductDto} from "../Base/ProductDto";
 
 export interface ProductContentDto extends ProductDto {
     currentQuantity: number;

@@ -9,10 +9,11 @@ import {
 import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
-import type {MaterialContentDto} from "components/MaterialContentDto";
+import type {MaterialContentDto} from "components/Content/MaterialContentDto";
 import {SupplierDto} from "../../components/Base/SupplierDto";
 import {getCurrentUserInfo} from "../../services/userService";
 import {MaterialDto} from "../../components/Base/MaterialDto";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const MaterialContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -158,9 +159,16 @@ const MaterialContent = () => {
     };
 
     return (
-        <>
-            <div>MaterialContent</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>자재 - 자재 목록</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
+                        <Button variant="primary" onClick={handleShowAdd}>
+                            +
+                        </Button>
+                    )}
+                </div>
                 <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="name">자재명</option>
@@ -179,12 +187,6 @@ const MaterialContent = () => {
                     초기화
                 </button>
             </div>
-
-            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "자재부") && (
-                <Button variant="primary" onClick={handleShowAdd}>
-                    +
-                </Button>
-            )}
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -294,72 +296,74 @@ const MaterialContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th onClick={() => handleSort("name")}>
+                            자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("spec")}>
+                            규격 {sortBy === "spec" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "spec" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("supplier")}>
+                            공급처 {sortBy === "supplier" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "supplier" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("currentQuantity")}>
+                            현재 수량 {sortBy === "currentQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "currentQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("expectedInboundQuantity")}>
+                            입고 예정 {sortBy === "expectedInboundQuantity" && sortDirection === "asc" &&
+                            <span>&uarr;</span>}
+                            {sortBy === "expectedInboundQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("plannedConsumptionQuantity")}>
+                            소모 예정 {sortBy === "plannedConsumptionQuantity" && sortDirection === "asc" &&
+                            <span>&uarr;</span>}
+                            {sortBy === "plannedConsumptionQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("actualQuantity")}>
+                            실제 수량 {sortBy === "actualQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "actualQuantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
 
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleSort("name")}>
-                        자재명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("spec")}>
-                        규격 {sortBy === "spec" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "spec" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("supplier")}>
-                        공급처 {sortBy === "supplier" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "supplier" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("currentQuantity")}>
-                        현재 수량 {sortBy === "currentQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "currentQuantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("expectedInboundQuantity")}>
-                        입고 예정 {sortBy === "expectedInboundQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "expectedInboundQuantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("plannedConsumptionQuantity")}>
-                        소모 예정 {sortBy === "plannedConsumptionQuantity" && sortDirection === "asc" &&
-                        <span>&uarr;</span>}
-                        {sortBy === "plannedConsumptionQuantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("actualQuantity")}>
-                        실제 수량 {sortBy === "actualQuantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "actualQuantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-
-                </tr>
-                </thead>
-                <tbody>
-                {sortMaterialContentList(materialContentList)
-                    .filter((materialContent) => {
-                        if (searchOption === "name") {
-                            return materialContent.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "spec") {
-                            return materialContent.spec.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "supplier") {
-                            return (
-                                materialContent.supplierDto?.companyName
-                                    .toLowerCase()
-                                    .includes(searchKeyword.toLowerCase()) || searchKeyword === ""
-                            );
-                        } else {
-                            return true;
-                        }
-                    }).map((materialContent) => (
-                        <tr key={materialContent.id} onClick={() => handleShowEdit(materialContent)}>
-                            <td>{materialContent.name}</td>
-                            <td>{materialContent.spec}</td>
-                            <td>{materialContent.supplierDto?.companyName}</td>
-                            <td>{materialContent.currentQuantity}</td>
-                            <td>{materialContent.expectedInboundQuantity}</td>
-                            <td>{materialContent.plannedConsumptionQuantity}</td>
-                            <td>{materialContent.actualQuantity}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortMaterialContentList(materialContentList)
+                        .filter((materialContent) => {
+                            if (searchOption === "name") {
+                                return materialContent.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "spec") {
+                                return materialContent.spec.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "supplier") {
+                                return (
+                                    materialContent.supplierDto?.companyName
+                                        .toLowerCase()
+                                        .includes(searchKeyword.toLowerCase()) || searchKeyword === ""
+                                );
+                            } else {
+                                return true;
+                            }
+                        }).map((materialContent) => (
+                            <tr key={materialContent.id} onClick={() => handleShowEdit(materialContent)}>
+                                <td>{materialContent.name}</td>
+                                <td>{materialContent.spec}</td>
+                                <td>{materialContent.supplierDto?.companyName}</td>
+                                <td>{materialContent.currentQuantity}</td>
+                                <td>{materialContent.expectedInboundQuantity}</td>
+                                <td>{materialContent.plannedConsumptionQuantity}</td>
+                                <td>{materialContent.actualQuantity}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>
     );
 };
 

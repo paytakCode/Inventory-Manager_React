@@ -9,7 +9,7 @@ import {
 import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
-import type {ProductionContentDto} from "components/ProductionContentDto";
+import type {ProductionContentDto} from "components/Content/ProductionContentDto";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import {ProductionDto} from "components/Base/ProductionDto";
 import {UserInfoDto} from "components/Base/UserInfoDto";
@@ -17,6 +17,7 @@ import {ProductDto} from "components/Base/ProductDto";
 import ProductionStatus from "components/Base/ProductionStatus";
 import moment from "moment";
 import {formatDate} from "../../utils/dateUtil";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const ProductionContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -170,9 +171,16 @@ const ProductionContent = () => {
     };
 
     return (
-        <>
-            <div>ProductionContent</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>생산 - 생산 관리</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
+                        <Button variant="primary" onClick={handleShowAdd}>
+                            +
+                        </Button>
+                    )}
+                </div>
                 <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="name">제품명</option>
@@ -190,11 +198,6 @@ const ProductionContent = () => {
                     초기화
                 </button>
             </div>
-            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
-                <Button variant="primary" onClick={handleShowAdd}>
-                    +
-                </Button>
-            )}
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -368,59 +371,60 @@ const ProductionContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
-
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleSort("name")}>
-                        제품명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("quantity")}>
-                        생산 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("manager")}>
-                        담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("targetDate")}>
-                        생산 목표일 {sortBy === "targetDate" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "targetDate" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("completionDate")}>
-                        생산 완료일 {sortBy === "completionDate" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "completionDate" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("status")}>
-                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {sortProductionContentList(productionContentList)
-                    .filter((productionContent) => {
-                        if (searchOption === "name") {
-                            return productionContent.productDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "manager") {
-                            return productionContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else {
-                            return true;
-                        }
-                    }).map((productionContent) => (
-                        <tr key={productionContent.id} onClick={() => handleShowEdit(productionContent)}>
-                            <td>{productionContent.productDto.name}</td>
-                            <td>{productionContent.quantity}</td>
-                            <td>{productionContent.managerDto.name}</td>
-                            <td>{formatDate(productionContent.targetDate)}</td>
-                            <td>{formatDate(productionContent.completionDate || new Date(''))}</td>
-                            <td>{productionContent.status}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th onClick={() => handleSort("name")}>
+                            제품명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("quantity")}>
+                            생산 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("manager")}>
+                            담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("targetDate")}>
+                            생산 목표일 {sortBy === "targetDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "targetDate" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("completionDate")}>
+                            생산 완료일 {sortBy === "completionDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "completionDate" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("status")}>
+                            진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortProductionContentList(productionContentList)
+                        .filter((productionContent) => {
+                            if (searchOption === "name") {
+                                return productionContent.productDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "manager") {
+                                return productionContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((productionContent) => (
+                            <tr key={productionContent.id} onClick={() => handleShowEdit(productionContent)}>
+                                <td>{productionContent.productDto.name}</td>
+                                <td>{productionContent.quantity}</td>
+                                <td>{productionContent.managerDto.name}</td>
+                                <td>{formatDate(productionContent.targetDate)}</td>
+                                <td>{formatDate(productionContent.completionDate || new Date(''))}</td>
+                                <td>{productionContent.status}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>
     );
 };
 

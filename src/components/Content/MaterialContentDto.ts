@@ -1,4 +1,4 @@
-import {MaterialDto} from "./Base/MaterialDto";
+import {MaterialDto} from "../Base/MaterialDto";
 
 export interface MaterialContentDto extends MaterialDto {
     currentQuantity: number;

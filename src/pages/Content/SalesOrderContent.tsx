@@ -10,7 +10,7 @@ import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
 import {SalesOrderDto} from "components/Base/SalesOrderDto";
-import {SalesOrderContentDto} from "components/SalesOrderContentDto";
+import {SalesOrderContentDto} from "components/Content/SalesOrderContentDto";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import {UserInfoDto} from "components/Base/UserInfoDto";
 import {getProductList} from "services/productService";
@@ -19,6 +19,7 @@ import {BuyerDto} from "../../components/Base/BuyerDto";
 import {ProductDto} from "../../components/Base/ProductDto";
 import {formatDate} from "../../utils/dateUtil";
 import moment from "moment/moment";
+import styles from "pages/Content/CommonContent.module.scss";
 
 const SalesOrderContent = () => {
     const currentUserInfo = getCurrentUserInfo();
@@ -193,9 +194,16 @@ const SalesOrderContent = () => {
     };
 
     return (
-        <>
-            <div>SalesOrder</div>
-            <div>
+        <div className={styles.content}>
+            <div className={styles.title}>영업 - 발주 목록</div>
+            <div className={styles.searchContainer}>
+                <div className={styles.addButton}>
+                    {(currentUserInfo.role === "관리자" || currentUserInfo.role === "영업부") && (
+                        <Button variant="primary" onClick={handleShowAdd}>
+                            +
+                        </Button>
+                    )}
+                </div>
                 <select value={searchOption} onChange={(e) => setSearchOption(e.target.value)}>
                     <option value="" disabled={true}>검색 옵션</option>
                     <option value="name">제품명</option>
@@ -214,11 +222,6 @@ const SalesOrderContent = () => {
                     초기화
                 </button>
             </div>
-            {(currentUserInfo.role === "관리자" || currentUserInfo.role === "영업부") && (
-                <Button variant="primary" onClick={handleShowAdd}>
-                    +
-                </Button>
-            )}
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -410,71 +413,72 @@ const SalesOrderContent = () => {
                     )}
                 </Modal.Footer>
             </Modal>
-
-            <Table striped bordered hover size="sm">
-                <thead>
-                <tr>
-                    <th onClick={() => handleSort("name")}>
-                        제품명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("quantity")}>
-                        판매 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("companyName")}>
-                        구매처 {sortBy === "companyName" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "companyName" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("manager")}>
-                        담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("status")}>
-                        진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("regDate")}>
-                        등록 날짜 {sortBy === "regDate" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "regDate" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("completionDate")}>
-                        완료 날짜 {sortBy === "completionDate" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "completionDate" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                    <th onClick={() => handleSort("dueDate")}>
-                        기한 {sortBy === "dueDate" && sortDirection === "asc" && <span>&uarr;</span>}
-                        {sortBy === "dueDate" && sortDirection === "desc" && <span>&darr;</span>}
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {sortSalesOrderContentList(salesOrderContentList)
-                    .filter((salesOrderContent) => {
-                        if (searchOption === "name") {
-                            return salesOrderContent.productDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "companyName") {
-                            return salesOrderContent.buyerDto.companyName.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else if (searchOption === "manager") {
-                            return salesOrderContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
-                        } else {
-                            return true;
-                        }
-                    }).map((salesOrderContent) => (
-                        <tr key={salesOrderContent.id} onClick={() => handleShowEdit(salesOrderContent)}>
-                            <td>{salesOrderContent.productDto.name}</td>
-                            <td>{salesOrderContent.quantity}</td>
-                            <td>{salesOrderContent.buyerDto.companyName}</td>
-                            <td>{salesOrderContent.managerDto.name}</td>
-                            <td>{salesOrderContent.status}</td>
-                            <td>{formatDate(salesOrderContent.regDate || new Date(""))}</td>
-                            <td>{formatDate(salesOrderContent.completionDate || new Date(""))}</td>
-                            <td>{formatDate(salesOrderContent.dueDate)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </>
+            <div className={styles.tableContainer}>
+                <Table striped bordered hover size="sm">
+                    <thead>
+                    <tr>
+                        <th onClick={() => handleSort("name")}>
+                            제품명 {sortBy === "name" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "name" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("quantity")}>
+                            판매 수량 {sortBy === "quantity" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "quantity" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("companyName")}>
+                            구매처 {sortBy === "companyName" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "companyName" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("manager")}>
+                            담당자 {sortBy === "manager" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "manager" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("status")}>
+                            진행 상태 {sortBy === "status" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "status" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("regDate")}>
+                            등록 날짜 {sortBy === "regDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "regDate" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("completionDate")}>
+                            완료 날짜 {sortBy === "completionDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "completionDate" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                        <th onClick={() => handleSort("dueDate")}>
+                            기한 {sortBy === "dueDate" && sortDirection === "asc" && <span>&uarr;</span>}
+                            {sortBy === "dueDate" && sortDirection === "desc" && <span>&darr;</span>}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {sortSalesOrderContentList(salesOrderContentList)
+                        .filter((salesOrderContent) => {
+                            if (searchOption === "name") {
+                                return salesOrderContent.productDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "companyName") {
+                                return salesOrderContent.buyerDto.companyName.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else if (searchOption === "manager") {
+                                return salesOrderContent.managerDto.name.toLowerCase().includes(searchKeyword.toLowerCase());
+                            } else {
+                                return true;
+                            }
+                        }).map((salesOrderContent) => (
+                            <tr key={salesOrderContent.id} onClick={() => handleShowEdit(salesOrderContent)}>
+                                <td>{salesOrderContent.productDto.name}</td>
+                                <td>{salesOrderContent.quantity}</td>
+                                <td>{salesOrderContent.buyerDto.companyName}</td>
+                                <td>{salesOrderContent.managerDto.name}</td>
+                                <td>{salesOrderContent.status}</td>
+                                <td>{formatDate(salesOrderContent.regDate || new Date(""))}</td>
+                                <td>{formatDate(salesOrderContent.completionDate || new Date(""))}</td>
+                                <td>{formatDate(salesOrderContent.dueDate)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </div>
     );
 };
 

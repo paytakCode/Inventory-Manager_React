@@ -1,4 +1,4 @@
-import {BuyerDto} from "./Base/BuyerDto";
+import {BuyerDto} from "../Base/BuyerDto";
 
 export interface BuyerContentDto extends BuyerDto {
 }
