@@ -3,8 +3,9 @@ import {renderContentByMenu} from "../utils/ContentUtil";
 import Layout from "./Layout/Layout";
 import ContentContainer from "./Container/ContentContainer";
 
-const LoginPage: React.FC = () => {
-    const [containerContent, setContainerContent] = useState<string>("Login");
+
+const RegisterContent: React.FC = () => {
+    const [containerContent, setContainerContent] = useState<string>("Register");
 
     const handleMenuSelect = (selectedMenu: string) => {
         setContainerContent(selectedMenu);
@@ -21,4 +22,5 @@ const LoginPage: React.FC = () => {
         </Layout>
     );
 };
-export default LoginPage;
+
+export default RegisterContent;
