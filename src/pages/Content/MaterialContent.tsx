@@ -26,6 +26,12 @@ const MaterialContent = () => {
     const [sortDirection, setSortDirection] = useState<string>("asc");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        name: false,
+        spec: false,
+        supplierDto: false
+    });
 
     const initialValues = {
         name: "",
@@ -62,6 +68,21 @@ const MaterialContent = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {name, spec, supplierDto} = formValues;
+
+        setValidFields(
+            name.trim() !== '' &&
+            spec.trim() !== '' &&
+            supplierDto?.id !== 0
+        );
+    };
 
     const sortMaterialContentList = (list: MaterialContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
@@ -104,14 +125,18 @@ const MaterialContent = () => {
     };
 
     const submitAddMaterial = async () => {
-        await addMaterial(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchMaterialContentList();
+        validateFields();
+        if (validFields) {
+            await addMaterial(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchMaterialContentList();
+        }
     };
 
     const submitUpdateMaterial = async () => {
-        if (editingMaterialId) {
+        validateFields();
+        if (editingMaterialId && validFields) {
             await updateMaterial(editingMaterialId, formValues);
             setFormValues(initialValues);
             setEditingMaterialId(null);
@@ -138,6 +163,11 @@ const MaterialContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            name: false,
+            spec: false,
+            supplierDto: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingMaterialId(null);
@@ -152,7 +182,11 @@ const MaterialContent = () => {
             details: materialContent.details,
             supplierDto: materialContent.supplierDto
         });
-
+        setInputTouched({
+            name: false,
+            spec: false,
+            supplierDto: false
+        });
         setIsEditMode(false);
         setEditingMaterialId(materialContent.id);
         setShow(true);
@@ -200,29 +234,43 @@ const MaterialContent = () => {
                                 type="text"
                                 autoFocus
                                 value={formValues.name}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, name: e.target.value })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, name: e.target.value});
+                                    setInputTouched({...inputTouched, name: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.name && formValues.name.trim() === ''}
+                                required
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                자재명을 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="spec">
                             <Form.Label>규격</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={formValues.spec}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, spec: e.target.value })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, spec: e.target.value});
+                                    setInputTouched({...inputTouched, spec: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.spec && formValues.spec.trim() === ''}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                규격을 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="supplier">
                             <Form.Label>공급처</Form.Label>
                             <Form.Control
                                 as="select"
                                 value={formValues.supplierDto?.id || 0}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         supplierDto: {
@@ -232,18 +280,25 @@ const MaterialContent = () => {
                                             loc: "",
                                             managerName: "",
                                             companyName: ""
-                                        },
-                                    })
-                                }
+                                        }
+                                    });
+                                    setInputTouched({...inputTouched, supplierDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.supplierDto && formValues.supplierDto?.id === 0}
                                 disabled={!isEditMode}
+                                required
                             >
-                                <option value="">공급처를 선택해주세요</option>
+                                <option value="0">공급처를 선택해주세요</option>
                                 {supplierList.map((supplier) => (
                                     <option key={supplier.id} value={supplier.id || 0}>
                                         {supplier.companyName}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                공급처를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group
                             className="mb-3"

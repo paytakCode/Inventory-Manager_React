@@ -34,6 +34,15 @@ const SalesOrderContent = () => {
     const [sortDirection, setSortDirection] = useState<string>("asc");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        buyerDto: false,
+        managerDto: false,
+        price: false,
+        quantity: false,
+        productDto: false,
+        dueDate: false
+    });
     const initialValues = {
         buyerDto: {
             companyName: "",
@@ -51,7 +60,8 @@ const SalesOrderContent = () => {
         productDto: {
             name: ""
         },
-        quantity: 0,
+        quantity: 1,
+        price: 0,
         dueDate: new Date()
     } as SalesOrderDto;
     const [formValues, setFormValues] = useState<SalesOrderDto>(initialValues);
@@ -95,6 +105,31 @@ const SalesOrderContent = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {
+            buyerDto,
+            managerDto,
+            price,
+            quantity,
+            productDto,
+            dueDate
+        } = formValues;
+
+        setValidFields(
+            quantity >= 1 &&
+            price >= 0 &&
+            buyerDto?.id !== 0 &&
+            managerDto?.id !== 0 &&
+            productDto?.id !== 0 &&
+            dueDate !== null
+        );
+    };
+
     const sortSalesOrderContentList = (list: SalesOrderContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
             if (sortBy === "name") {
@@ -135,14 +170,18 @@ const SalesOrderContent = () => {
 
 
     const submitAddSalesOrder = async () => {
-        await addSalesOrder(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchSalesOrderContentList();
+        validateFields();
+        if (validFields) {
+            await addSalesOrder(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchSalesOrderContentList();
+        }
     };
 
     const submitUpdateSalesOrder = async () => {
-        if (editingSalesOrderId) {
+        validateFields();
+        if (editingSalesOrderId && validFields) {
             await updateSalesOrder(editingSalesOrderId, formValues);
             setFormValues(initialValues);
             setEditingSalesOrderId(null);
@@ -169,6 +208,14 @@ const SalesOrderContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            buyerDto: false,
+            managerDto: false,
+            price: false,
+            quantity: false,
+            productDto: false,
+            dueDate: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingSalesOrderId(null);
@@ -180,6 +227,7 @@ const SalesOrderContent = () => {
             id: salesOrderContent.id,
             productDto: salesOrderContent.productDto,
             quantity: salesOrderContent.quantity,
+            price: salesOrderContent.price,
             regDate: salesOrderContent.regDate,
             managerDto: salesOrderContent.managerDto,
             buyerDto: salesOrderContent.buyerDto,
@@ -188,6 +236,14 @@ const SalesOrderContent = () => {
             status: salesOrderContent.status
         });
 
+        setInputTouched({
+            buyerDto: false,
+            managerDto: false,
+            price: false,
+            quantity: false,
+            productDto: false,
+            dueDate: false
+        });
         setIsEditMode(false);
         setEditingSalesOrderId(salesOrderContent.id);
         setShow(true);
@@ -233,19 +289,21 @@ const SalesOrderContent = () => {
                             <Form.Label>제품명</Form.Label>
                             <Form.Control
                                 as="select"
-                                value={formValues.productDto.id || ""}
-                                onChange={(e) =>
+                                value={formValues.productDto.id || 0}
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         productDto: {
+                                            ...formValues.productDto,
                                             id: parseInt(e.target.value),
-                                            name: "",
-                                            spec: "",
-                                            details: ""
-                                        }
-                                    })
-                                }
+                                        },
+                                    });
+                                    setInputTouched({...inputTouched, productDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.productDto && formValues.productDto?.id === 0}
                                 disabled={!isEditMode}
+                                required
                             >
                                 <option value="">제품을 선택해주세요</option>
                                 {productList.map((product) => (
@@ -254,23 +312,49 @@ const SalesOrderContent = () => {
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                제품을 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="quantity">
                             <Form.Label>수량</Form.Label>
                             <Form.Control
                                 type="number"
                                 value={formValues.quantity}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, quantity: parseInt(e.target.value) })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, quantity: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, quantity: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.quantity && formValues.quantity < 1}
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                1개 이상의 수량을 입력하세요.
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="price">
+                            <Form.Label>총 판매가</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={formValues.price}
+                                onChange={(e) => {
+                                    setFormValues({...formValues, price: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, price: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.price && formValues.price >= 0}
+                                disabled={!isEditMode}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                0원 이상의 금액을 입력하세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="buyer">
                             <Form.Label>구매처</Form.Label>
                             <Form.Control
                                 as="select"
-                                value={formValues.buyerDto.id || ""}
+                                value={formValues.buyerDto.id || 0}
                                 onChange={(e) =>
                                     setFormValues({
                                         ...formValues,
@@ -285,7 +369,7 @@ const SalesOrderContent = () => {
                                 }
                                 disabled={!isEditMode}
                             >
-                                <option value="">구매처를 선택해주세요</option>
+                                <option value="0">구매처를 선택해주세요</option>
                                 {buyerList.map((buyer) => (
                                     <option key={buyer.id} value={buyer.id || 0}>
                                         {buyer.companyName} - {buyer.managerName}
@@ -298,29 +382,31 @@ const SalesOrderContent = () => {
                             <Form.Control
                                 as="select"
                                 value={formValues.managerDto.id}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         managerDto: {
                                             ...formValues.managerDto,
-                                            id: parseInt(e.target.value)
-                                        }
-                                    })
-                                }
+                                            id: parseInt(e.target.value),
+                                        },
+                                    });
+                                    setInputTouched({...inputTouched, managerDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.managerDto && formValues.managerDto?.id === 0}
                                 disabled={!isEditMode}
                             >
-                                <option value={currentUserInfo.id}>
-                                    {currentUserInfo.name} - {currentUserInfo.email}
-                                </option>
-                                {userList.map(
-                                    (user) =>
-                                        currentUserInfo.id !== user.id && (
-                                            <option key={user.id} value={user.id}>
-                                                {user.name} - {user.email}
-                                            </option>
-                                        )
-                                )}
+                                <option
+                                    value={currentUserInfo.id}>{currentUserInfo.name} - {currentUserInfo.email}</option>
+                                {userList.map((user) => (currentUserInfo.id !== user.id) && (
+                                    <option key={user.id} value={user.id}>
+                                        {user.name} - {user.email}
+                                    </option>
+                                ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                담당자를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="regDate">
                             <Form.Label>등록 날짜</Form.Label>
@@ -351,12 +437,18 @@ const SalesOrderContent = () => {
                             <Form.Control
                                 type="date"
                                 value={formValues.dueDate ? moment(formValues.dueDate).format('YYYY-MM-DD') : ''}
-                                onChange={(e) =>
-                                    setFormValues({...formValues, dueDate: new Date(e.target.value)})
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, dueDate: new Date(e.target.value)});
+                                    setInputTouched({...inputTouched, dueDate: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.dueDate && formValues.dueDate !== null}
                                 disabled={!isEditMode}
                             />
                         </Form.Group>
+                        <Form.Control.Feedback type="invalid">
+                            기한을 선택해주세요.
+                        </Form.Control.Feedback>
                         <Form.Group className="mb-3" controlId="status">
                             <Form.Label>진행 상태</Form.Label>
                             <Form.Control

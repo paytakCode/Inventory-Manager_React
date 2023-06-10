@@ -18,6 +18,13 @@ const SupplierContent = () => {
     const [sortDirection, setSortDirection] = useState<string>("asc");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        companyName: false,
+        managerName: false,
+        tel: false,
+        loc: false
+    });
     const initialValues = {
         companyName: "",
         managerName: "",
@@ -54,6 +61,22 @@ const SupplierContent = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {companyName, managerName, tel, loc} = formValues;
+
+        setValidFields(
+            companyName.trim() !== '' &&
+            managerName.trim() !== '' &&
+            loc.trim() !== '' &&
+            /^(\d{3}-\d{4}-\d{4})$/.test(tel.trim())
+        );
+    };
+
     const sortSupplierContentList = (list: SupplierContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
             if (sortBy === "companyName") {
@@ -80,14 +103,18 @@ const SupplierContent = () => {
     };
 
     const submitAddSupplier = async () => {
-        await addSupplier(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchSupplierContentList();
+        validateFields();
+        if (validFields) {
+            await addSupplier(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchSupplierContentList();
+        }
     };
 
     const submitUpdateSupplier = async () => {
-        if (editingSupplierId) {
+        validateFields();
+        if (editingSupplierId && validFields) {
             await updateSupplier(editingSupplierId, formValues);
             setFormValues(initialValues);
             setEditingSupplierId(null);
@@ -114,6 +141,12 @@ const SupplierContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            companyName: false,
+            managerName: false,
+            tel: false,
+            loc: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingSupplierId(null);
@@ -129,6 +162,12 @@ const SupplierContent = () => {
             loc: supplierContent.loc
         });
 
+        setInputTouched({
+            companyName: false,
+            managerName: false,
+            tel: false,
+            loc: false
+        });
         setIsEditMode(false);
         setEditingSupplierId(supplierContent.id);
         setShow(true);
@@ -175,44 +214,73 @@ const SupplierContent = () => {
                                 type="text"
                                 autoFocus
                                 value={formValues.companyName}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, companyName: e.target.value })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, companyName: e.target.value});
+                                    setInputTouched({...inputTouched, companyName: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.companyName && formValues.companyName.trim() === ''}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                회사명을 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="managerName">
                             <Form.Label>담당자</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={formValues.managerName}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, managerName: e.target.value })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, managerName: e.target.value});
+                                    setInputTouched({...inputTouched, managerName: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.managerName && formValues.managerName.trim() === ''}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                담당자를 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="tel">
                             <Form.Label>연락처</Form.Label>
                             <Form.Control
                                 type="tel"
                                 value={formValues.tel}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, tel: e.target.value })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, tel: e.target.value});
+                                    setInputTouched({...inputTouched, tel: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.tel && (!/^(\d{3}-\d{4}-\d{4})$/.test(formValues.tel.trim()) || formValues.tel.trim() === '')}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                전화번호 형식에 맞춰 작성해주세요.
+                                예) 010-1234-5678
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="loc">
                             <Form.Label>주소</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={formValues.loc}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, loc: e.target.value })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, loc: e.target.value});
+                                    setInputTouched({...inputTouched, loc: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.loc && formValues.loc.trim() === ''}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                주소를 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

@@ -38,6 +38,11 @@ const ProductMaterialContent = () => {
     const [materialSearchKeyword, setMaterialSearchKeyword] = useState("");
     const [materialSearchOption, setMaterialSearchOption] = useState("");
     const [isEditMode, setIsEditMode] = useState(false);
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        materialDto: false,
+        requiredQuantity: false
+    });
     const initialValues = {
         productMaterialIdDto: {
             productDto: {
@@ -47,7 +52,7 @@ const ProductMaterialContent = () => {
                 spec: ""
             }
         },
-        requiredQuantity: 0
+        requiredQuantity: 1
     } as ProductMaterialDto;
     const [formValues, setFormValues] = useState<ProductMaterialDto>(initialValues);
     let modalTitle;
@@ -96,6 +101,20 @@ const ProductMaterialContent = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {productMaterialIdDto, requiredQuantity} = formValues;
+
+        setValidFields(
+            requiredQuantity >= 1 &&
+            productMaterialIdDto.materialDto.id !== 0
+        );
+    };
 
     const sortProductMaterialContentList = (list: ProductMaterialContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
@@ -160,14 +179,18 @@ const ProductMaterialContent = () => {
 
 
     const submitAddProductMaterial = async () => {
-        await addProductMaterial(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchProductMaterialContentList();
+        validateFields();
+        if (validFields) {
+            await addProductMaterial(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchProductMaterialContentList();
+        }
     };
 
     const submitUpdateProductMaterial = async () => {
-        if (editingProductMaterialId) {
+        validateFields();
+        if (editingProductMaterialId && validFields) {
             await updateProductMaterial(editingProductMaterialId, formValues);
             setFormValues(initialValues);
             setEditingProductMaterialId(null);
@@ -194,6 +217,10 @@ const ProductMaterialContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            materialDto: false,
+            requiredQuantity: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingProductMaterialId(null);
@@ -204,6 +231,10 @@ const ProductMaterialContent = () => {
         setFormValues({
             productMaterialIdDto: productMaterialDto.productMaterialIdDto,
             requiredQuantity: productMaterialDto.requiredQuantity
+        });
+        setInputTouched({
+            materialDto: false,
+            requiredQuantity: false
         });
         setIsEditMode(false);
         setEditingProductMaterialId(productMaterialDto.productMaterialIdDto);
@@ -231,7 +262,7 @@ const ProductMaterialContent = () => {
                     초기화
                 </button>
             </div>
-            <Modal show={showBom} onHide={handleCloseBOM} size="lg">
+            <Modal show={showBom} onHide={handleCloseBOM} size="xl">
                 <Modal.Header closeButton>
                     <Modal.Title>{selectedProductName}의 자재 목록</Modal.Title>
                 </Modal.Header>
@@ -396,7 +427,7 @@ const ProductMaterialContent = () => {
                             <Form.Control
                                 as="select"
                                 value={formValues.productMaterialIdDto.materialDto.id || 0}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         productMaterialIdDto: {
@@ -414,28 +445,41 @@ const ProductMaterialContent = () => {
                                                 supplierDto: null
                                             },
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, materialDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.materialDto && formValues.productMaterialIdDto.materialDto.id === 0}
                                 disabled={!isEditMode}
+                                required
                             >
-                                <option value="">자재를 선택해주세요</option>
+                                <option value="0">자재를 선택해주세요</option>
                                 {materialList.map((material) => (
                                     <option key={material.id} value={material.id || 0}>
                                         {material.name} - {material.spec}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                자재를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="quantity">
                             <Form.Label>수량</Form.Label>
                             <Form.Control
                                 type="number"
                                 value={formValues.requiredQuantity}
-                                onChange={(e) =>
-                                    setFormValues({...formValues, requiredQuantity: parseInt(e.target.value)})
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, requiredQuantity: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, requiredQuantity: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.requiredQuantity && formValues.requiredQuantity < 1}
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                1개 이상의 수량을 입력하세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

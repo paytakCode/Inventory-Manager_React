@@ -26,13 +26,19 @@ const MaterialRequestContent = () => {
     const [sortDirection, setSortDirection] = useState<string>("asc");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        materialDto: false,
+        requesterDto: false,
+        quantity: false
+    });
     const initialValues = {
         materialDto: {
             name: "",
             spec: ""
         },
         requesterDto: currentUserInfo,
-        quantity: 0
+        quantity: 1
     } as MaterialRequestDto;
     const [formValues, setFormValues] = useState<MaterialRequestDto>(initialValues);
     const [editingMaterialRequestId, setEditingMaterialRequestId] = useState<number | null>(null);
@@ -70,6 +76,21 @@ const MaterialRequestContent = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {materialDto, quantity, requesterDto} = formValues;
+
+        setValidFields(
+            quantity >= 1 &&
+            requesterDto?.id !== 0 &&
+            materialDto?.id !== 0
+        );
+    };
 
     const sortMaterialRequestContentList = (list: MaterialRequestContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
@@ -110,18 +131,17 @@ const MaterialRequestContent = () => {
     };
 
     const submitAddMaterialRequest = async () => {
-
-
-        await addMaterialRequest(formValues);
-
-        setFormValues(initialValues);
-
-        setShow(false);
-        await fetchMaterialRequestContentList();
+        validateFields();
+        if (validFields) {
+            await addMaterialRequest(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchMaterialRequestContentList();
+        }
     };
 
     const submitUpdateMaterialRequest = async () => {
-        if (editingMaterialRequestId) {
+        if (editingMaterialRequestId && validFields) {
             await updateMaterialRequest(editingMaterialRequestId, formValues);
 
             setFormValues(initialValues);
@@ -151,6 +171,11 @@ const MaterialRequestContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            materialDto: false,
+            requesterDto: false,
+            quantity: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingMaterialRequestId(null);
@@ -168,8 +193,13 @@ const MaterialRequestContent = () => {
             materialPurchaseDto: materialRequestContent.materialPurchaseDto
         });
 
+        setInputTouched({
+            materialDto: false,
+            requesterDto: false,
+            quantity: false
+        });
         setIsEditMode(false);
-        if(materialRequestContent.id){
+        if (materialRequestContent.id) {
             setEditingMaterialRequestId(materialRequestContent.id);
         }
         setShow(true);
@@ -214,59 +244,79 @@ const MaterialRequestContent = () => {
                             <Form.Control
                                 as="select"
                                 value={formValues.materialDto?.id || 0}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         materialDto: {
                                             ...formValues.materialDto,
                                             id: parseInt(e.target.value),
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, materialDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.materialDto && formValues.materialDto?.id === 0}
                                 disabled={!isEditMode}
+                                required
                             >
-                                <option value="">자재를 선택해주세요</option>
+                                <option value="0">자재를 선택해주세요</option>
                                 {materialList.map((material) => (
                                     <option key={material.id} value={material.id || 0}>
                                         {material.name} - {material.spec}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                자재를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="quantity">
                             <Form.Label>수량</Form.Label>
                             <Form.Control
                                 type="number"
                                 value={formValues.quantity}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, quantity: parseInt(e.target.value) })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, quantity: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, quantity: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.quantity && formValues.quantity < 1}
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                1개 이상의 수량을 입력하세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="requester">
                             <Form.Label>요청자</Form.Label>
                             <Form.Control
                                 as="select"
                                 value={formValues.requesterDto.id}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         requesterDto: {
                                             ...formValues.requesterDto,
                                             id: parseInt(e.target.value),
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, requesterDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.requesterDto && formValues.requesterDto?.id === 0}
                                 disabled={!isEditMode}
                             >
-                                <option value={currentUserInfo.id}>{currentUserInfo.name} - {currentUserInfo.email}</option>
+                                <option
+                                    value={currentUserInfo.id}>{currentUserInfo.name} - {currentUserInfo.email}</option>
                                 {userList.map((user) => (currentUserInfo.id !== user.id) && (
                                     <option key={user.id} value={user.id}>
                                         {user.name} - {user.email}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                요청자를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group
                             className="mb-3"

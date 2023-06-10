@@ -19,7 +19,7 @@ const RegisterContent: React.FC = () => {
     };
     const [registerData, setRegisterData] = useState<UserDto>(initialValues);
     const [validFields, setValidFields] = useState(false);
-    const [touchedFields, setTouchedFields] = useState({
+    const [inputTouched, setInputTouched] = useState({
         name: false,
         email: false,
         password: false,
@@ -32,7 +32,7 @@ const RegisterContent: React.FC = () => {
             ...prevData,
             [name]: value,
         }));
-        setTouchedFields((prevFields) => ({
+        setInputTouched((prevFields) => ({
             ...prevFields,
             [name]: true,
         }));
@@ -55,6 +55,7 @@ const RegisterContent: React.FC = () => {
 
 
     const handleRegister = () => {
+        validateFields();
         if (validFields) {
             setLoading(true);
             addUser(registerData)
@@ -81,7 +82,7 @@ const RegisterContent: React.FC = () => {
                             value={registerData.name}
                             onChange={handleChange}
                             required
-                            isInvalid={!validFields && touchedFields.name && registerData.name.trim() === ''}
+                            isInvalid={!validFields && inputTouched.name && registerData.name.trim() === ''}
                         />
                         <Form.Control.Feedback type="invalid">
                             이름을 입력해주세요.
@@ -96,7 +97,7 @@ const RegisterContent: React.FC = () => {
                             value={registerData.email}
                             onChange={handleChange}
                             required
-                            isInvalid={!validFields && touchedFields.email && (!emailRegex.test(registerData.email) || registerData.email.trim() === '')}
+                            isInvalid={!validFields && inputTouched.email && (!emailRegex.test(registerData.email) || registerData.email.trim() === '')}
                         />
                         <Form.Control.Feedback type="invalid">
                             이메일을 형식에 맞게 입력해주세요.
@@ -111,7 +112,7 @@ const RegisterContent: React.FC = () => {
                             value={registerData.password}
                             onChange={handleChange}
                             required
-                            isInvalid={!validFields && touchedFields.password && (registerData.password.length < 8 || registerData.password.trim() === '')}
+                            isInvalid={!validFields && inputTouched.password && (registerData.password.length < 8 || registerData.password.trim() === '')}
                         />
                         <Form.Control.Feedback type="invalid">
                             비밀번호를 8자 이상 입력해주세요.
@@ -126,7 +127,7 @@ const RegisterContent: React.FC = () => {
                             value={registerData.tel}
                             onChange={handleChange}
                             required
-                            isInvalid={!validFields && touchedFields.tel && (!/^(\d{3}-\d{4}-\d{4})$/.test(registerData.tel.trim()) || registerData.tel.trim() === '')}
+                            isInvalid={!validFields && inputTouched.tel && (!/^(\d{3}-\d{4}-\d{4})$/.test(registerData.tel.trim()) || registerData.tel.trim() === '')}
                         />
                         <Form.Control.Feedback type="invalid">
                             전화번호 형식에 맞춰 작성해주세요.

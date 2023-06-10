@@ -31,13 +31,21 @@ const ProductionContent = () => {
     const [sortDirection, setSortDirection] = useState<string>("asc");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        productDto: false,
+        managerDto: false,
+        targetDate: false,
+        quantity: false,
+        status: false
+    });
     const initialValues = {
         productDto: {
             name: "",
             details: ""
         },
         managerDto: currentUserInfo,
-        quantity: 0,
+        quantity: 1,
         targetDate: new Date()
     } as ProductionDto;
     const [formValues, setFormValues] = useState<ProductionDto>(initialValues);
@@ -74,6 +82,22 @@ const ProductionContent = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {productDto, managerDto, targetDate, quantity, status} = formValues;
+
+        setValidFields(
+            productDto?.id !== 0 &&
+            quantity >= 1 &&
+            status !== null &&
+            targetDate !== null
+        );
+    };
 
     const sortProductionContentList = (list: ProductionContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
@@ -112,14 +136,17 @@ const ProductionContent = () => {
 
 
     const submitAddProduction = async () => {
-        await addProduction(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchProductionContentList();
+        validateFields();
+        if (validFields) {
+            await addProduction(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchProductionContentList();
+        }
     };
 
     const submitUpdateProduction = async () => {
-        if (editingProductionId) {
+        if (editingProductionId && validFields) {
             await updateProduction(editingProductionId, formValues);
             setFormValues(initialValues);
             setEditingProductionId(null);
@@ -146,6 +173,13 @@ const ProductionContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            productDto: false,
+            managerDto: false,
+            targetDate: false,
+            quantity: false,
+            status: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingProductionId(null);
@@ -165,6 +199,13 @@ const ProductionContent = () => {
             completionDate: productionContent.completionDate
         });
 
+        setInputTouched({
+            productDto: false,
+            managerDto: false,
+            targetDate: false,
+            quantity: false,
+            status: false
+        });
         setIsEditMode(false);
         setEditingProductionId(productionContent.id);
         setShow(true);
@@ -210,50 +251,68 @@ const ProductionContent = () => {
                             <Form.Control
                                 as="select"
                                 value={formValues.productDto?.id || 0}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         productDto: {
-                                            ...formValues.productDto,
                                             id: parseInt(e.target.value),
+                                            name: "",
+                                            spec: "",
+                                            details: ""
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, productDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.productDto && formValues.productDto?.id === 0}
                                 disabled={!isEditMode}
+                                required
                             >
-                                <option value="">제품을 선택해주세요</option>
+                                <option value="0">제품을 선택해주세요</option>
                                 {productList.map((product) => (
                                     <option key={product.id} value={product.id || 0}>
                                         {product.name} - {product.spec}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                제품을 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="quantity">
                             <Form.Label>수량</Form.Label>
                             <Form.Control
                                 type="number"
                                 value={formValues.quantity}
-                                onChange={(e) =>
-                                    setFormValues({...formValues, quantity: parseInt(e.target.value)})
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, quantity: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, quantity: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.quantity && formValues.quantity < 1}
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                1개 이상의 수량을 입력하세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="manager">
                             <Form.Label>담당자</Form.Label>
                             <Form.Control
                                 as="select"
                                 value={formValues.managerDto.id}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         managerDto: {
                                             ...formValues.managerDto,
                                             id: parseInt(e.target.value),
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, managerDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.managerDto && formValues.managerDto?.id === 0}
                                 disabled={!isEditMode}
                             >
                                 <option
@@ -264,6 +323,9 @@ const ProductionContent = () => {
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                담당자를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group
                             className="mb-3"
@@ -285,11 +347,18 @@ const ProductionContent = () => {
                             <Form.Control
                                 type="date"
                                 value={formValues.targetDate ? moment(formValues.targetDate).format('YYYY-MM-DD') : ''}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({...formValues, targetDate: new Date(e.target.value)})
-                                }
+                                    setInputTouched({...inputTouched, targetDate: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.targetDate && formValues.targetDate !== null}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                목표일을 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="completionDate">
@@ -320,13 +389,17 @@ const ProductionContent = () => {
                             <Form.Control
                                 as="select"
                                 value={formValues.status || ProductionStatus.PLANNED}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         status: e.target.value as ProductionStatus
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, status: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.status && formValues.status !== null}
                                 disabled={!isEditMode}
+                                required
                             >
                                 {Object.values(ProductionStatus).map((status) => (
                                     <option key={status} value={status}>
@@ -334,6 +407,9 @@ const ProductionContent = () => {
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                진행 상태를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

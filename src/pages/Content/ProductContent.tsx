@@ -18,6 +18,11 @@ const ProductContent = () => {
     const [sortDirection, setSortDirection] = useState<string>("asc");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        name: false,
+        spec: false
+    });
     const initialValues = {
         name: "",
         spec: ""
@@ -50,6 +55,20 @@ const ProductContent = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {name, spec} = formValues;
+
+        setValidFields(
+            name.trim() !== '' &&
+            spec?.trim() !== ''
+        );
+    };
 
     const sortProductContentList = (list: ProductContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
@@ -86,14 +105,17 @@ const ProductContent = () => {
     };
 
     const submitAddProduct = async () => {
-        await addProduct(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchProductContentList();
+        validateFields();
+        if (validFields) {
+            await addProduct(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchProductContentList();
+        }
     };
 
     const submitUpdateProduct = async () => {
-        if (editingProductId) {
+        if (editingProductId && validFields) {
             await updateProduct(editingProductId, formValues);
             setFormValues(initialValues);
             setEditingProductId(null);
@@ -120,6 +142,10 @@ const ProductContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            name: false,
+            spec: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingProductId(null);
@@ -134,6 +160,10 @@ const ProductContent = () => {
             details: productContent.details
         });
 
+        setInputTouched({
+            name: false,
+            spec: false
+        });
         setIsEditMode(false);
         setEditingProductId(productContent.id);
         setShow(true);
@@ -179,22 +209,36 @@ const ProductContent = () => {
                                 type="text"
                                 autoFocus
                                 value={formValues.name}
-                                onChange={(e) =>
-                                    setFormValues({...formValues, name: e.target.value})
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, name: e.target.value});
+                                    setInputTouched({...inputTouched, name: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.name && formValues.name.trim() === ''}
+                                required
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                제품명을 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="spec">
                             <Form.Label>규격</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={formValues.spec || ""}
-                                onChange={(e) =>
-                                    setFormValues({...formValues, spec: e.target.value})
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, spec: e.target.value});
+                                    setInputTouched({...inputTouched, spec: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.spec && formValues.spec?.trim() === ''}
                                 disabled={!isEditMode}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                규격을 입력해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group
                             className="mb-3"

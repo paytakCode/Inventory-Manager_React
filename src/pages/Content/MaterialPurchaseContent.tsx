@@ -29,13 +29,20 @@ const MaterialPurchaseContent = () => {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchOption, setSearchOption] = useState("");
     const [show, setShow] = useState(false);
+    const [validFields, setValidFields] = useState(true);
+    const [inputTouched, setInputTouched] = useState({
+        materialDto: false,
+        managerDto: false,
+        price: false,
+        quantity: false
+    });
     const initialValues = {
         materialDto: {
             name: "",
             spec: ""
         },
         price: 0,
-        quantity: 0,
+        quantity: 1,
         managerDto: currentUserInfo
     } as MaterialPurchaseDto;
 
@@ -79,6 +86,22 @@ const MaterialPurchaseContent = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        validateFields();
+    }, [formValues, inputTouched]);
+
+
+    const validateFields = () => {
+        const {materialDto, quantity, managerDto, price} = formValues;
+
+        setValidFields(
+            quantity >= 1 &&
+            price >= 0 &&
+            materialDto?.id !== 0 &&
+            managerDto?.id !== 0
+        );
+    };
+
     const sortMaterialPurchaseContentList = (list: MaterialPurchaseContentDto[]) => {
         const sortedList = [...list].sort((a, b) => {
             if (sortBy === "name") {
@@ -117,14 +140,18 @@ const MaterialPurchaseContent = () => {
     };
 
     const submitAddMaterialPurchase = async () => {
-        await addMaterialPurchase(formValues);
-        setFormValues(initialValues);
-        setShow(false);
-        await fetchMaterialPurchaseContentList();
+        validateFields();
+        if (validFields) {
+            await addMaterialPurchase(formValues);
+            setFormValues(initialValues);
+            setShow(false);
+            await fetchMaterialPurchaseContentList();
+        }
     };
 
     const submitUpdateMaterialPurchase = async () => {
-        if (editingMaterialPurchaseId) {
+        validateFields();
+        if (editingMaterialPurchaseId && validFields) {
             await updateMaterialPurchase(editingMaterialPurchaseId, formValues);
             setFormValues(initialValues);
             setEditingMaterialPurchaseId(null);
@@ -151,6 +178,12 @@ const MaterialPurchaseContent = () => {
     };
 
     const handleShowAdd = () => {
+        setInputTouched({
+            materialDto: false,
+            quantity: false,
+            price: false,
+            managerDto: false
+        });
         setFormValues(initialValues);
         setIsEditMode(true);
         setEditingMaterialPurchaseId(null);
@@ -159,18 +192,24 @@ const MaterialPurchaseContent = () => {
 
     const handleShowEdit = (materialPurchaseContent: MaterialPurchaseContentDto) => {
         setFormValues({
-            id : materialPurchaseContent.id,
+            id: materialPurchaseContent.id,
             materialDto: materialPurchaseContent.materialDto,
             managerDto: materialPurchaseContent.managerDto,
             materialRequestDto: materialPurchaseContent.materialRequestDto,
             details: materialPurchaseContent.details,
             lotNo: materialPurchaseContent.lotNo,
             price: materialPurchaseContent.price,
-            quantity : materialPurchaseContent.quantity,
+            quantity: materialPurchaseContent.quantity,
             status: materialPurchaseContent.status
         });
+        setInputTouched({
+            materialDto: false,
+            quantity: false,
+            price: false,
+            managerDto: false
+        });
         setIsEditMode(false);
-        if(materialPurchaseContent.id){
+        if (materialPurchaseContent.id) {
             setEditingMaterialPurchaseId(materialPurchaseContent.id);
         }
         setShow(true);
@@ -215,59 +254,79 @@ const MaterialPurchaseContent = () => {
                             <Form.Control
                                 as="select"
                                 value={formValues.materialDto?.id || 0}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         materialDto: {
                                             ...formValues.materialDto,
                                             id: parseInt(e.target.value),
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, materialDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.materialDto && formValues.materialDto?.id === 0}
                                 disabled={!isEditMode}
+                                required
                             >
-                                <option value="">자재를 선택해주세요</option>
+                                <option value="0">자재를 선택해주세요</option>
                                 {materialList.map((material) => (
                                     <option key={material.id} value={material.id || 0}>
                                         {material.name} - {material.spec}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                자재를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="quantity">
                             <Form.Label>수량</Form.Label>
                             <Form.Control
                                 type="number"
                                 value={formValues.quantity}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, quantity: parseInt(e.target.value) })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, quantity: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, quantity: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.quantity && formValues.quantity < 1}
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                1개 이상의 수량을 입력하세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="manager">
                             <Form.Label>담당자</Form.Label>
                             <Form.Control
                                 as="select"
                                 value={formValues.managerDto.id}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setFormValues({
                                         ...formValues,
                                         managerDto: {
                                             ...formValues.managerDto,
                                             id: parseInt(e.target.value),
                                         },
-                                    })
-                                }
+                                    });
+                                    setInputTouched({...inputTouched, managerDto: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.managerDto && formValues.managerDto?.id === 0}
                                 disabled={!isEditMode}
                             >
-                                <option value={currentUserInfo.id}>{currentUserInfo.name} - {currentUserInfo.email}</option>
+                                <option
+                                    value={currentUserInfo.id}>{currentUserInfo.name} - {currentUserInfo.email}</option>
                                 {userList.map((user) => (currentUserInfo.id !== user.id) && (
                                     <option key={user.id} value={user.id}>
                                         {user.name} - {user.email}
                                     </option>
                                 ))}
                             </Form.Control>
+                            <Form.Control.Feedback type="invalid">
+                                담당자를 선택해주세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="request">
                             <Form.Label>관련 요청</Form.Label>
@@ -329,11 +388,17 @@ const MaterialPurchaseContent = () => {
                             <Form.Control
                                 type="number"
                                 value={formValues.price}
-                                onChange={(e) =>
-                                    setFormValues({ ...formValues, price: parseInt(e.target.value) })
-                                }
+                                onChange={(e) => {
+                                    setFormValues({...formValues, price: parseInt(e.target.value)});
+                                    setInputTouched({...inputTouched, price: true});
+                                    validateFields();
+                                }}
+                                isInvalid={!validFields && inputTouched.price && formValues.price >= 0}
                                 disabled={!isEditMode}
                             />
+                            <Form.Control.Feedback type="invalid">
+                                0원 이상의 금액을 입력하세요.
+                            </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="status">
                             <Form.Label>구매 상태</Form.Label>
