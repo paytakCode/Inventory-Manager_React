@@ -95,7 +95,8 @@ const ProductionContent = () => {
             productDto?.id !== 0 &&
             quantity >= 1 &&
             status !== null &&
-            targetDate !== null
+            targetDate !== null &&
+            managerDto.id !== 0
         );
     };
 
