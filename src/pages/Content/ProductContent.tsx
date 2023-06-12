@@ -176,7 +176,7 @@ const ProductContent = () => {
                 <div className={styles.addButton}>
                     {(currentUserInfo.role === "관리자" || currentUserInfo.role === "생산부") && (
                         <Button variant="primary" onClick={handleShowAdd}>
-                            +
+                            추가
                         </Button>
                     )}
                 </div>
