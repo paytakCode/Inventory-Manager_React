@@ -146,7 +146,7 @@ const Header = (props: { onMenuSelect: (menu: string) => void }) => {
                             내정보
                         </NavDropdown.Item>
                         <NavDropdown.Item onClick={() => {
-                            logout().then(() => props.onMenuSelect("Login"))
+                            logout().then(() => navigate("/login"))
                         }}>
                             로그아웃
                         </NavDropdown.Item>
@@ -159,7 +159,7 @@ const Header = (props: { onMenuSelect: (menu: string) => void }) => {
     return (
         <Navbar variant="dark" bg="dark" expand="lg">
             <Container fluid>
-                <Navbar.Brand onClick={() => handleMenuClick("Default")}>
+                <Navbar.Brand>
                     <h3 className={styles.title}>Inventory Manager</h3>
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="navbar-dark-example"/>
