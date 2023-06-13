@@ -146,6 +146,13 @@ const MaterialPurchaseContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchMaterialPurchaseContentList();
+        } else {
+            setInputTouched({
+                materialDto: true,
+                quantity: true,
+                price: true,
+                managerDto: true
+            });
         }
     };
 
@@ -157,6 +164,13 @@ const MaterialPurchaseContent = () => {
             setEditingMaterialPurchaseId(null);
             setShow(false);
             await fetchMaterialPurchaseContentList();
+        } else {
+            setInputTouched({
+                materialDto: true,
+                quantity: true,
+                price: true,
+                managerDto: true
+            });
         }
     };
 

@@ -110,6 +110,13 @@ const BuyerContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchBuyerContentList();
+        } else {
+            setInputTouched({
+                companyName: true,
+                managerName: true,
+                tel: true,
+                loc: true
+            });
         }
     };
 
@@ -121,6 +128,13 @@ const BuyerContent = () => {
             setEditingBuyerId(null);
             setShow(false);
             await fetchBuyerContentList();
+        } else {
+            setInputTouched({
+                companyName: true,
+                managerName: true,
+                tel: true,
+                loc: true
+            });
         }
     };
 

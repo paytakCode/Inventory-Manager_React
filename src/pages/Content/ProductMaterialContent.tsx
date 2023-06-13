@@ -185,6 +185,11 @@ const ProductMaterialContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchProductMaterialContentList();
+        } else {
+            setInputTouched({
+                materialDto: true,
+                requiredQuantity: true
+            });
         }
     };
 
@@ -196,6 +201,11 @@ const ProductMaterialContent = () => {
             setEditingProductMaterialId(null);
             setShow(false);
             await fetchProductMaterialContentList();
+        } else {
+            setInputTouched({
+                materialDto: true,
+                requiredQuantity: true
+            });
         }
     };
 

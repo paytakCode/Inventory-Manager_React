@@ -131,6 +131,12 @@ const MaterialContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchMaterialContentList();
+        } else {
+            setInputTouched({
+                name: true,
+                spec: true,
+                supplierDto: true
+            });
         }
     };
 
@@ -142,6 +148,12 @@ const MaterialContent = () => {
             setEditingMaterialId(null);
             setShow(false);
             await fetchMaterialContentList();
+        } else {
+            setInputTouched({
+                name: true,
+                spec: true,
+                supplierDto: true
+            });
         }
     };
 

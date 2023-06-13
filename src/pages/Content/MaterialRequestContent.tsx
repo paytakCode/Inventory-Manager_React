@@ -137,6 +137,12 @@ const MaterialRequestContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchMaterialRequestContentList();
+        } else {
+            setInputTouched({
+                materialDto: true,
+                requesterDto: true,
+                quantity: true
+            });
         }
     };
 
@@ -149,6 +155,12 @@ const MaterialRequestContent = () => {
             setEditingMaterialRequestId(null);
             setShow(false);
             await fetchMaterialRequestContentList();
+        } else {
+            setInputTouched({
+                materialDto: true,
+                requesterDto: true,
+                quantity: true
+            });
         }
     };
 

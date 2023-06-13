@@ -143,6 +143,14 @@ const ProductionContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchProductionContentList();
+        } else {
+            setInputTouched({
+                productDto: true,
+                managerDto: true,
+                targetDate: true,
+                quantity: true,
+                status: true
+            });
         }
     };
 
@@ -153,6 +161,14 @@ const ProductionContent = () => {
             setEditingProductionId(null);
             setShow(false);
             await fetchProductionContentList();
+        } else {
+            setInputTouched({
+                productDto: true,
+                managerDto: true,
+                targetDate: true,
+                quantity: true,
+                status: true
+            });
         }
     };
 

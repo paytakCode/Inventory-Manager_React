@@ -66,6 +66,13 @@ const RegisterContent: React.FC = () => {
                 .catch(() => {
                     setLoading(false);
                 });
+        } else {
+            setInputTouched({
+                name: true,
+                email: true,
+                password: true,
+                tel: true,
+            })
         }
     };
 

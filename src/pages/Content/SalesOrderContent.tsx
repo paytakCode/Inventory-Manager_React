@@ -176,6 +176,15 @@ const SalesOrderContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchSalesOrderContentList();
+        } else {
+            setInputTouched({
+                buyerDto: true,
+                managerDto: true,
+                price: true,
+                quantity: true,
+                productDto: true,
+                dueDate: true
+            });
         }
     };
 
@@ -187,6 +196,15 @@ const SalesOrderContent = () => {
             setEditingSalesOrderId(null);
             setShow(false);
             await fetchSalesOrderContentList();
+        } else {
+            setInputTouched({
+                buyerDto: true,
+                managerDto: true,
+                price: true,
+                quantity: true,
+                productDto: true,
+                dueDate: true
+            });
         }
     };
 

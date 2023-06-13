@@ -111,6 +111,11 @@ const ProductContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchProductContentList();
+        } else {
+            setInputTouched({
+                name: true,
+                spec: true
+            });
         }
     };
 
@@ -121,6 +126,11 @@ const ProductContent = () => {
             setEditingProductId(null);
             setShow(false);
             await fetchProductContentList();
+        } else {
+            setInputTouched({
+                name: true,
+                spec: true
+            });
         }
     };
 

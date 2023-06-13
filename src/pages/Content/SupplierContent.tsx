@@ -109,6 +109,13 @@ const SupplierContent = () => {
             setFormValues(initialValues);
             setShow(false);
             await fetchSupplierContentList();
+        } else {
+            setInputTouched({
+                companyName: true,
+                managerName: true,
+                tel: true,
+                loc: true
+            });
         }
     };
 
@@ -120,6 +127,13 @@ const SupplierContent = () => {
             setEditingSupplierId(null);
             setShow(false);
             await fetchSupplierContentList();
+        } else {
+            setInputTouched({
+                companyName: true,
+                managerName: true,
+                tel: true,
+                loc: true
+            });
         }
     };
 
