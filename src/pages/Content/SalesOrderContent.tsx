@@ -323,7 +323,7 @@ const SalesOrderContent = () => {
                                 disabled={!isEditMode}
                                 required
                             >
-                                <option value="">제품을 선택해주세요</option>
+                                <option value="0">제품을 선택해주세요</option>
                                 {productList.map((product) => (
                                     <option key={product.id} value={product.id || 0}>
                                         {product.name} - {product.spec}
@@ -361,7 +361,7 @@ const SalesOrderContent = () => {
                                     setInputTouched({...inputTouched, price: true});
                                     validateFields();
                                 }}
-                                isInvalid={!validFields && inputTouched.price && formValues.price >= 0}
+                                isInvalid={!validFields && inputTouched.price && formValues.price < 0}
                                 disabled={!isEditMode}
                             />
                             <Form.Control.Feedback type="invalid">
