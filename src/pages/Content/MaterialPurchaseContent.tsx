@@ -38,6 +38,7 @@ const MaterialPurchaseContent = () => {
     });
     const initialValues = {
         materialDto: {
+            id: 0,
             name: "",
             spec: ""
         },

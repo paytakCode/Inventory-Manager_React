@@ -41,6 +41,7 @@ const ProductionContent = () => {
     });
     const initialValues = {
         productDto: {
+            id: 0,
             name: "",
             details: ""
         },

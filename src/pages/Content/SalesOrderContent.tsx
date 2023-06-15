@@ -45,6 +45,7 @@ const SalesOrderContent = () => {
     });
     const initialValues = {
         buyerDto: {
+            id: 0,
             companyName: "",
             managerName: "",
             tel: "",
@@ -58,6 +59,7 @@ const SalesOrderContent = () => {
             role: ""
         },
         productDto: {
+            id: 0,
             name: ""
         },
         quantity: 1,
