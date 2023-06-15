@@ -46,9 +46,11 @@ const ProductMaterialContent = () => {
     const initialValues = {
         productMaterialIdDto: {
             productDto: {
+                id: 0,
                 name: ""
             },
             materialDto: {
+                id: 0,
                 spec: ""
             }
         },

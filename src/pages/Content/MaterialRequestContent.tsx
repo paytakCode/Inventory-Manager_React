@@ -34,6 +34,7 @@ const MaterialRequestContent = () => {
     });
     const initialValues = {
         materialDto: {
+            id: 0,
             name: "",
             spec: ""
         },
