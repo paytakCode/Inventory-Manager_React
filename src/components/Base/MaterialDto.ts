@@ -1,4 +1,4 @@
-import {SupplierDto} from "./SupplierDto";
+import {SupplierDto} from "components/Base/SupplierDto";
 
 export interface MaterialDto {
     id: number | null;

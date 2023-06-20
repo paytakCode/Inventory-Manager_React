@@ -1,7 +1,7 @@
 import OrderStatus from "components/Base/OrderStatus";
-import {ProductDto} from "./ProductDto";
-import {UserInfoDto} from "./UserInfoDto";
-import {BuyerDto} from "./BuyerDto";
+import {ProductDto} from "components/Base/ProductDto";
+import {UserInfoDto} from "components/Base/UserInfoDto";
+import {BuyerDto} from "components/Base/BuyerDto";
 
 export interface SalesOrderDto {
     id: number | null;

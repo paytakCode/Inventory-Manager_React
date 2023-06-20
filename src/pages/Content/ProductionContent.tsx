@@ -16,7 +16,7 @@ import {UserInfoDto} from "components/Base/UserInfoDto";
 import {ProductDto} from "components/Base/ProductDto";
 import ProductionStatus from "components/Base/ProductionStatus";
 import moment from "moment";
-import {formatDate} from "../../utils/dateUtil";
+import {formatDate} from "utils/dateUtil";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const ProductionContent = () => {

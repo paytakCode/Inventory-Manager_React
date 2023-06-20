@@ -1,13 +1,13 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import {MaterialDto} from "../components/Base/MaterialDto";
-import {MaterialRequestDto} from "../components/Base/MaterialRequestDto";
-import {MaterialPurchaseDto} from "../components/Base/MaterialPurchaseDto";
-import {SupplierDto} from "../components/Base/SupplierDto";
-import {MaterialContentDto} from "../components/Content/MaterialContentDto";
-import {MaterialRequestContentDto} from "../components/Content/MaterialRequestContentDto";
-import {MaterialPurchaseContentDto} from "../components/Content/MaterialPurchaseContentDto";
-import {SupplierContentDto} from "../components/Content/SupplierContentDto";
+import {MaterialDto} from "components/Base/MaterialDto";
+import {MaterialRequestDto} from "components/Base/MaterialRequestDto";
+import {MaterialPurchaseDto} from "components/Base/MaterialPurchaseDto";
+import {SupplierDto} from "components/Base/SupplierDto";
+import {MaterialContentDto} from "components/Content/MaterialContentDto";
+import {MaterialRequestContentDto} from "components/Content/MaterialRequestContentDto";
+import {MaterialPurchaseContentDto} from "components/Content/MaterialPurchaseContentDto";
+import {SupplierContentDto} from "components/Content/SupplierContentDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export const getMaterialList = async (): Promise<MaterialDto[]> => {

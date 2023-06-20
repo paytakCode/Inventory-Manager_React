@@ -10,9 +10,9 @@ import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
 import type {MaterialContentDto} from "components/Content/MaterialContentDto";
-import {SupplierDto} from "../../components/Base/SupplierDto";
-import {getCurrentUserInfo} from "../../services/userService";
-import {MaterialDto} from "../../components/Base/MaterialDto";
+import {SupplierDto} from "components/Base/SupplierDto";
+import {getCurrentUserInfo} from "services/userService";
+import {MaterialDto} from "components/Base/MaterialDto";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const MaterialContent = () => {

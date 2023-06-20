@@ -11,7 +11,7 @@ import BuyerContent from "pages/Content/BuyerContent";
 import UserProfileContent from "pages/Content/UserProfileContent";
 import LoginContent from "pages/Content/LoginContent";
 import DefaultContent from "pages/Content/DefaultContent";
-import RegisterContent from "../pages/Content/RegisterContent";
+import RegisterContent from "pages/Content/RegisterContent";
 
 const contentMap: { [key: string]: React.FC } = {
     Default: DefaultContent,

@@ -1,4 +1,4 @@
-import {MaterialRequestDto} from "../Base/MaterialRequestDto";
+import {MaterialRequestDto} from "components/Base/MaterialRequestDto";
 
 export interface MaterialRequestContentDto extends MaterialRequestDto{
 }

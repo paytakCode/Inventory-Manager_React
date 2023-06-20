@@ -1,6 +1,6 @@
 import React from "react";
-import {getCurrentUserInfo} from "../../services/userService";
-import {isLogined} from "../../services/authService";
+import {getCurrentUserInfo} from "services/userService";
+import {isLogined} from "services/authService";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const DefaultContent = () => {

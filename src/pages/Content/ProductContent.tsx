@@ -4,8 +4,8 @@ import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
 import type {ProductContentDto} from "components/Content/ProductContentDto";
-import {getCurrentUserInfo} from "../../services/userService";
-import {ProductDto} from "../../components/Base/ProductDto";
+import {getCurrentUserInfo} from "services/userService";
+import {ProductDto} from "components/Base/ProductDto";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const ProductContent = () => {

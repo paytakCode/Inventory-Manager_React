@@ -1,9 +1,9 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import {ProductionDto} from "../components/Base/ProductionDto";
-import {ProductDto} from "../components/Base/ProductDto";
-import {ProductMaterialDto} from "../components/Base/ProductMaterialDto";
-import {ProductMaterialIdDto} from "../components/Base/ProductMaterialIdDto";
+import {ProductionDto} from "components/Base/ProductionDto";
+import {ProductDto} from "components/Base/ProductDto";
+import {ProductMaterialDto} from "components/Base/ProductMaterialDto";
+import {ProductMaterialIdDto} from "components/Base/ProductMaterialIdDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export const getProductList = async () => {

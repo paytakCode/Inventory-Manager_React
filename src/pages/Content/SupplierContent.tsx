@@ -3,9 +3,9 @@ import {addSupplier, deleteSupplier, getSupplierContentList, updateSupplier} fro
 import Table from 'react-bootstrap/Table';
 import {Form, Modal} from "react-bootstrap";
 import Button from 'react-bootstrap/Button';
-import {SupplierDto} from "../../components/Base/SupplierDto";
-import {SupplierContentDto} from "../../components/Content/SupplierContentDto";
-import {getCurrentUserInfo} from "../../services/userService";
+import {SupplierDto} from "components/Base/SupplierDto";
+import {SupplierContentDto} from "components/Content/SupplierContentDto";
+import {getCurrentUserInfo} from "services/userService";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const SupplierContent = () => {

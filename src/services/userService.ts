@@ -1,8 +1,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Role from "components/Base/Role";
-import {UserInfoDto} from "../components/Base/UserInfoDto";
-import {UserDto} from "../components/Base/UserDto";
+import {UserInfoDto} from "components/Base/UserInfoDto";
+import {UserDto} from "components/Base/UserDto";
 
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
