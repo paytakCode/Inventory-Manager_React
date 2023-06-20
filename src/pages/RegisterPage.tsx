@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {renderContentByMenu} from "../utils/ContentUtil";
-import Layout from "./Layout/Layout";
-import ContentContainer from "./Container/ContentContainer";
+import {renderContentByMenu} from "utils/ContentUtil";
+import Layout from "pages/Layout/Layout";
+import ContentContainer from "pages/Container/ContentContainer";
 
 
 const RegisterContent: React.FC = () => {

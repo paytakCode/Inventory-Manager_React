@@ -14,10 +14,10 @@ import {SalesOrderContentDto} from "components/Content/SalesOrderContentDto";
 import {getCurrentUserInfo, getUserList} from "services/userService";
 import {UserInfoDto} from "components/Base/UserInfoDto";
 import {getProductList} from "services/productService";
-import OrderStatus from "../../components/Base/OrderStatus";
-import {BuyerDto} from "../../components/Base/BuyerDto";
-import {ProductDto} from "../../components/Base/ProductDto";
-import {formatDate} from "../../utils/dateUtil";
+import OrderStatus from "components/Base/OrderStatus";
+import {BuyerDto} from "components/Base/BuyerDto";
+import {ProductDto} from "components/Base/ProductDto";
+import {formatDate} from "utils/dateUtil";
 import moment from "moment/moment";
 import styles from "pages/Content/CommonContent.module.scss";
 

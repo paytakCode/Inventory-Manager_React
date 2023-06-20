@@ -14,8 +14,8 @@ import {getCurrentUserInfo, getUserList} from "services/userService";
 import Button from "react-bootstrap/Button";
 import {MaterialDto} from "components/Base/MaterialDto";
 import {UserInfoDto} from "components/Base/UserInfoDto";
-import {MaterialRequestDto} from "../../components/Base/MaterialRequestDto";
-import PurchaseStatus from "../../components/Base/PurchaseStatus";
+import {MaterialRequestDto} from "components/Base/MaterialRequestDto";
+import PurchaseStatus from "components/Base/PurchaseStatus";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const MaterialPurchaseContent = () => {

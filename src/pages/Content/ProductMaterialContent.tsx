@@ -11,10 +11,10 @@ import Button from 'react-bootstrap/Button';
 import {getCurrentUserInfo} from "services/userService";
 import {ProductMaterialDto} from "components/Base/ProductMaterialDto";
 import {ProductMaterialContentDto} from "components/Content/ProductMaterialContentDto";
-import {ProductMaterialIdDto} from "../../components/Base/ProductMaterialIdDto";
-import {MaterialDto} from "../../components/Base/MaterialDto";
-import {getMaterialContentList, getMaterialList} from "../../services/materialService";
-import {MaterialContentDto} from "../../components/Content/MaterialContentDto";
+import {ProductMaterialIdDto} from "components/Base/ProductMaterialIdDto";
+import {MaterialDto} from "components/Base/MaterialDto";
+import {getMaterialContentList, getMaterialList} from "services/materialService";
+import {MaterialContentDto} from "components/Content/MaterialContentDto";
 import styles from "pages/Content/CommonContent.module.scss";
 
 const ProductMaterialContent = () => {

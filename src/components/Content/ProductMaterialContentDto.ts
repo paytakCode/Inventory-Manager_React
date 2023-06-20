@@ -1,5 +1,5 @@
-import {ProductDto} from "../Base/ProductDto";
-import {ProductMaterialDto} from "../Base/ProductMaterialDto";
+import {ProductDto} from "components/Base/ProductDto";
+import {ProductMaterialDto} from "components/Base/ProductMaterialDto";
 
 export interface ProductMaterialContentDto {
     productDto: ProductDto;

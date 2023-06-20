@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {addUser} from 'services/userService';
-import {UserDto} from '../../components/Base/UserDto';
+import {UserDto} from 'components/Base/UserDto';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import styles from 'pages/Content/RegisterContent.module.scss';

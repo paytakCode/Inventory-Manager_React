@@ -1,9 +1,9 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import {BuyerContentDto} from "../components/Content/BuyerContentDto";
-import {BuyerDto} from "../components/Base/BuyerDto";
-import {SalesOrderDto} from "../components/Base/SalesOrderDto";
-import {SalesOrderContentDto} from "../components/Content/SalesOrderContentDto";
+import {BuyerContentDto} from "components/Content/BuyerContentDto";
+import {BuyerDto} from "components/Base/BuyerDto";
+import {SalesOrderDto} from "components/Base/SalesOrderDto";
+import {SalesOrderContentDto} from "components/Content/SalesOrderContentDto";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export const getSalesOrderList = async () => {

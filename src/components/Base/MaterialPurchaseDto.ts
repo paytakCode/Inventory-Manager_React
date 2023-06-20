@@ -1,7 +1,7 @@
 import PurchaseStatus from "components/Base/PurchaseStatus";
-import {MaterialDto} from "./MaterialDto";
-import {UserInfoDto} from "./UserInfoDto";
-import {MaterialRequestDto} from "./MaterialRequestDto";
+import {MaterialDto} from "components/Base/MaterialDto";
+import {UserInfoDto} from "components/Base/UserInfoDto";
+import {MaterialRequestDto} from "components/Base/MaterialRequestDto";
 
 export interface MaterialPurchaseDto {
     id: number | null;
